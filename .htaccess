@@ -1,0 +1,32 @@
+Options All -Indexes
+
+# ===== SEGURIDAD =====
+# Bloquear acceso a archivos sensibles
+<FilesMatch "^(\.env|\.htaccess|error_log|composer\.(json|lock)|.*\.md)$">
+  Require all denied
+</FilesMatch>
+
+# Bloquear acceso directo a archivos de código en carpetas internas
+RewriteRule ^(Config|Libraries|Models|Controllers|Helpers)/(.*)$ - [F,L]
+RewriteRule ^(error_log\.php|.*\.sql)$ - [F,L]
+
+# Cabeceras de seguridad
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set X-XSS-Protection "0"
+</IfModule>
+
+# ===== REESCRITURA =====
+RewriteEngine on
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)$ index.php?route=$1 [QSA,L]
+
+# Redireccion HTTPS en produccion
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^internet.mipaginaweb\.pe$ [OR]
+RewriteCond %{HTTP_HOST} ^www\.internet\.mipaginaweb\.pe$
+RewriteCond %{HTTPS} !on
+RewriteRule ^(.*)$ https://internet.mipaginaweb.pe/$1 [R=301,L,NE]

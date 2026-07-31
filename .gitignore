@@ -1,0 +1,30 @@
+# Credenciales y entorno
+.env
+.env.local
+.env.*.local
+
+# Copias de seguridad y dumps
+*.sql
+*.zip
+*.rar
+*.bak
+
+# Logs
+error_log
+error_log.php
+*.log
+
+# Dependencias de vendor (se instalan con composer)
+Libraries/dompdf/vendor/
+Libraries/resize/vendor/
+Libraries/spreadsheet/vendor/
+
+# Sistema operativo / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Composer
+composer.lock
