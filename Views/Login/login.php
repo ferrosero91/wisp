@@ -29,8 +29,8 @@
         <link rel="stylesheet" href="<?= base_style() ?>/css/default/app.min.css">
         <link rel="stylesheet" href="<?= base_style() ?>/css/jquery-confirm.min.css">
         <link rel="stylesheet" href="<?= base_style() ?>/bookstores/gritter/css/jquery.gritter.css"/>
-        <link rel="stylesheet" href="<?= base_style() ?>/css/login.css?v=2026080211">
-        <link rel="stylesheet" href="<?= base_style() ?>/css/login-modern.css?v=2026080211">
+        <link rel="stylesheet" href="<?= base_style() ?>/css/login.css?v=2026080214">
+        <link rel="stylesheet" href="<?= base_style() ?>/css/login-modern.css?v=2026080214">
         <title><?= $data['page_name'] ?></title>
     </head>
     <body class="pace-top">
@@ -143,10 +143,10 @@
         <script> const base_url = "<?= base_url(); ?>"; </script>
         <script src="<?= base_style() ?>/js/app.min.js"></script>
         <script src="<?= base_style() ?>/js/particles.min.js"></script>
-        <script src="<?= base_style() ?>/js/functions.js?v=2026080213"></script>
+        <script src="<?= base_style() ?>/js/functions.js?v=2026080214"></script>
         <script src="<?= base_style() ?>/js/jquery-confirm.min.js"></script>
         <script src="<?= base_style() ?>/bookstores/parsleyjs/parsley.js"></script>
         <script src="<?= base_style() ?>/bookstores/gritter/js/jquery.gritter.min.js"></script>
-        <script src="<?= base_style() ?>/js/functions/<?= $data['page_functions_js']; ?>?v=2026080213"></script>
+        <script src="<?= base_style() ?>/js/functions/<?= $data['page_functions_js']; ?>?v=2026080214"></script>
     </body>
 </html>

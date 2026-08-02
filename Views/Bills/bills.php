@@ -89,22 +89,22 @@
           <table id="list" class="table table-bordered dt-responsive nowrap dataTable dtr-inline collapsed" style="width: 100%;">
             <thead>
               <tr>
-                <th>Nº Factura</th>
-                <th>Mes Fact.</th>
-                <th>Cliente</th>
-                <th>F.Emision</th>
-                <th>F.Vencimiento</th>
-                <th style="max-width: 60px !important; width: 60px;">Total</th>
-                <th style="max-width: 70px !important; width: 70px;">Pendiente</th>
-                <th style="max-width: 60px !important; width: 60px;">Subtotal</th>
-                <th style="max-width: 70px !important; width: 70px;">Descuento</th>
-                <th>Tipo</th>
-                <th>F.Pago</th>
-                <th>Forma pago</th>
-                <th>Metodo</th>
-                <th>Observación</th>
-                <th class="all">Estado</th>
-                <th class="all" data-orderable="false" style="max-width: 40px !important; width: 40px;"></th>
+                <th data-priority="1">Nº Factura</th>
+                <th data-priority="6">Mes Fact.</th>
+                <th data-priority="2">Cliente</th>
+                <th data-priority="5">F.Emision</th>
+                <th data-priority="7">F.Vencimiento</th>
+                <th data-priority="3" style="max-width: 60px !important; width: 60px;">Total</th>
+                <th data-priority="4" style="max-width: 70px !important; width: 70px;">Pendiente</th>
+                <th data-priority="10" style="max-width: 60px !important; width: 60px;">Subtotal</th>
+                <th data-priority="11" style="max-width: 70px !important; width: 70px;">Descuento</th>
+                <th data-priority="8">Tipo</th>
+                <th data-priority="12">F.Pago</th>
+                <th data-priority="13">Forma pago</th>
+                <th data-priority="14">Metodo</th>
+                <th data-priority="15">Observación</th>
+                <th data-priority="1" class="all">Estado</th>
+                <th data-priority="1" class="all" data-orderable="false" style="max-width: 40px !important; width: 40px;"></th>
               </tr>
             </thead>
             <tbody></tbody>

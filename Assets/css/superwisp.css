@@ -2261,3 +2261,118 @@ form{
 		text-align: center;
 	}
 }
+/* ===== RESPONSIVE TABLES - BILLS ===== */
+@media (max-width: 991px){
+  table.dataTable.dtr-inline.collapsed>tbody>tr>td:first-child:before,
+  table.dataTable.dtr-inline.collapsed>tbody>tr>th:first-child:before{
+    top: 50% !important;
+    transform: translateY(-50%);
+    width: 24px !important;
+    height: 24px !important;
+    line-height: 24px !important;
+    border-radius: 8px !important;
+    border: none !important;
+    background: var(--m-primary, #0e9f9f) !important;
+    box-shadow: 0 2px 8px rgba(14,159,159,.3);
+    font-size: 11px;
+    color: #fff !important;
+  }
+  table.dataTable.dtr-inline.collapsed>tbody>tr.parent>td:first-child:before{
+    background: #5b6b80 !important;
+  }
+  table.dataTable>tbody>tr.child{
+    background: #f8fafd !important;
+  }
+  table.dataTable>tbody>tr.child>td{
+    padding: 12px 16px !important;
+    background: #f8fafd !important;
+    border-bottom: 1px solid #e4e9f0 !important;
+  }
+  table.dataTable>tbody>tr.child ul.dtr-details{
+    width: 100%;
+    display: block;
+    padding: 0;
+    margin: 0;
+  }
+  table.dataTable>tbody>tr.child ul.dtr-details>li{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 8px 4px;
+    border-bottom: 1px dashed #e6ebf2;
+  }
+  table.dataTable>tbody>tr.child ul.dtr-details>li:last-child{
+    border-bottom: none;
+  }
+  table.dataTable>tbody>tr.child span.dtr-title{
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #7a8ba0;
+    min-width: auto;
+    padding-right: 14px;
+    flex-shrink: 0;
+  }
+  table.dataTable>tbody>tr.child span.dtr-data{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 1;
+    min-width: 0;
+    text-align: right;
+    font-size: 13px;
+    color: #2d3a48;
+    font-weight: 500;
+  }
+  table.dataTable>tbody>tr.child span.dtr-data .action-buttons{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  table.dataTable>tbody>tr.child span.dtr-data .action-buttons a{
+    margin: 0 2px;
+  }
+  /* Invoice summary responsive */
+  .invoice_summary .table{
+    font-size: 12px;
+  }
+  .invoice_summary .table td,
+  .invoice_summary .table th{
+    padding: 6px 8px !important;
+  }
+}
+@media (max-width: 575px){
+  table.dataTable>tbody>tr.child ul.dtr-details>li{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  table.dataTable>tbody>tr.child span.dtr-data{
+    justify-content: flex-start;
+    text-align: left;
+    width: 100%;
+  }
+  .invoice_summary .table td,
+  .invoice_summary .table th{
+    padding: 4px 6px !important;
+    font-size: 11px !important;
+  }
+  .panel-heading-btn{
+    display: flex;
+    gap: 4px;
+  }
+  .options-group{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  .options-group .btn{
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}

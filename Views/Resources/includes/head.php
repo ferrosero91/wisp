@@ -32,7 +32,7 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700"/>
         <link rel="stylesheet" href="<?= base_style() ?>/css/default/app.min.css">
         <link rel="stylesheet" href="<?= base_style() ?>/css/datatables.min.css"/>
-        <link rel="stylesheet" href="<?= base_style() ?>/css/superwisp.css?v=2026080211">
+        <link rel="stylesheet" href="<?= base_style() ?>/css/superwisp.css?v=2026080214">
         <link rel="stylesheet" href="<?= base_style() ?>/css/jquery-confirm.min.css">
         <link rel="stylesheet" href="<?= base_style() ?>/bookstores/simple-line-icons/css/simple-line-icons.css">
         <link rel="stylesheet" href="<?= base_style() ?>/bookstores/ionicons/css/ionicons.min.css">
@@ -41,7 +41,7 @@
         <link rel="stylesheet" href="<?= base_style() ?>/bookstores/smartwizard/css/smart_wizard.css">
         <link rel="stylesheet" href="<?= base_style() ?>/bookstores/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css">
         <link rel="stylesheet" href="<?= base_style() ?>/bookstores/lightbox/css/lightbox.css">
-        <link rel="stylesheet" href="<?= base_style() ?>/css/modern.css?v=2026080211">
+        <link rel="stylesheet" href="<?= base_style() ?>/css/modern.css?v=2026080214">
         <!-- ================== FIN ARCHIVOS CSS ============== -->
         <!-- ================== INICIO TITULO ================= -->
         <title><?= $data['page_name'] ?></title>
