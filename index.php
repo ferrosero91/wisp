@@ -4,13 +4,8 @@
   $route = isset($_GET['route']) ? $_GET['route'] : "login/login";
   $routes = explode("/",$route);
   $controller = $routes[0];
-  $methop = $routes[0];
+  $methop = isset($routes[1]) && $routes[1] != "" ? $routes[1] : "index";
   $params = "";
-  if(isset($routes[1])){
-    if($routes[1] != ""){
-      $methop = $routes[1];
-    }
-  }
   if(isset($routes[2])){
     if($routes[2] != ""){
       for($i=2; $i < count($routes); $i++){

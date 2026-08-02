@@ -138,7 +138,7 @@
             </li>
             <?php } ?>
             <?php if(!empty($_SESSION['permits'][BILLS]['v']) || !empty($_SESSION['permits'][PAYMENTS]['v'])){ ?>
-            <li class="has-sub <?php if($current[0]=="bills" || $current[0]=="payments") echo"active"; ?>">
+            <li class="has-sub <?php if($current[0]=="bills" || $current[0]=="payments" || $current[0]=="electronicreports") echo"active"; ?>">
                 <a href="javascript:;">
                     <b class="caret"></b>
                     <i class="fa fa-chart-line"></i>
@@ -164,6 +164,11 @@
                     <?php if(!empty($_SESSION['permits'][PAYMENTS]['v'])){ ?>
                     <?php if($_SESSION['userData']['profileid'] == ADMINISTRATOR){ ?>
                     <li class="<?php if($current[0]=="payments" && $current[1]=="statistics") echo"active"; ?>"><a href="<?= base_url() ?>/payments/statistics">Estadisticas</a></li>
+                    <?php } ?>
+                    <?php } ?>
+                    <?php if(!empty($_SESSION['permits'][BILLS]['v'])){ ?>
+                    <?php if($_SESSION['userData']['profileid'] == ADMINISTRATOR){ ?>
+                    <li class="<?php if($current[0]=="electronicreports") echo"active"; ?>"><a href="<?= base_url() ?>/electronicreports">Facturación Electrónica</a></li>
                     <?php } ?>
                     <?php } ?>
                 </ul>

@@ -36,7 +36,7 @@
         <!-- CSS crítico -->
         <link rel="stylesheet" href="<?= base_style() ?>/css/default/app.min.css">
         <link rel="stylesheet" href="<?= base_style() ?>/css/datatables.min.css"/>
-        <link rel="stylesheet" href="<?= base_style() ?>/css/superwisp.css?v=2026080217">
+        <link rel="stylesheet" href="<?= base_style() ?>/css/superwisp.css?v=2026080220">
         <link rel="stylesheet" href="<?= base_style() ?>/css/jquery-confirm.min.css">
         <link rel="stylesheet" href="<?= base_style() ?>/bookstores/simple-line-icons/css/simple-line-icons.css">
         <link rel="stylesheet" href="<?= base_style() ?>/bookstores/ionicons/css/ionicons.min.css">
