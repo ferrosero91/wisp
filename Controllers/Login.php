@@ -11,35 +11,95 @@
             $data['page_name'] = "Login";
             $data['page_functions_js'] = "login.js";
             $data['business'] = business_session();
+            $data['csrf_token'] = generate_csrf_token();
             $this->views->getView($this,"login",$data);
         }
         public function validation(){
           if($_POST){
+            // Validar CSRF Token
+            if(empty($_POST['csrf_token']) || !validate_csrf_token($_POST['csrf_token'])){
+                $arrResponse = array('status' => "error", 'msg' => 'Token de seguridad inválido. Recargue la página.');
+                echo json_encode($arrResponse,JSON_UNESCAPED_UNICODE);
+                die();
+            }
+
             if(empty($_POST['username']) || empty($_POST['password'])){
                 $arrResponse = array('status' => "warning", 'msg' => 'El usuario y contraseña son campos obligatorios.');
             }else{
-              $username  =  strtolower(strClean($_POST['username']));
-              $password = encrypt($_POST['password']);
-              $request = $this->model->validation($username, $password);
+              $username = strtolower(sanitize_string($_POST['username']));
+              $password = $_POST['password'];
+
+              // Rate Limiting - Verificar intentos
+              $rate_key = 'login_' . $username . '_' . $_SERVER['REMOTE_ADDR'];
+              if(!check_rate_limit($rate_key, 5, 900)){
+                  $remaining = get_rate_limit_remaining($rate_key);
+                  $minutes = ceil($remaining / 60);
+                  log_security_event('RATE_LIMIT', "Username: {$username}", 'WARNING');
+                  $arrResponse = array('status' => "error", 'msg' => "Demasiados intentos. Espere {$minutes} minutos.");
+                  echo json_encode($arrResponse,JSON_UNESCAPED_UNICODE);
+                  die();
+              }
+
+              // Buscar usuario por username
+              $request = $this->model->get_user_by_username($username);
               if(empty($request)){
+                record_failed_attempt($rate_key);
+                log_security_event('LOGIN_FAILED', "Username: {$username} - User not found", 'WARNING');
                 $arrResponse = array('status' => "warning", 'msg' => 'Usuario o contraseña es incorrecta.');
               }else{
                 $arrData = $request;
-                if($arrData['state'] == 1){
-                  if(!empty($_POST["remember"])){
-                    $cookie_expiration_time = time() + (365 * 24 * 60 * 60);
-                    setcookie("username",$username,$cookie_expiration_time);
-                  }else{
-                    clearCookie();
-                  }
-                  $_SESSION['idUser'] = $arrData['id'];
-                  $_SESSION['login'] = true;
-                  $arrData = $this->model->login_session($_SESSION['idUser']);
-                  user_session($_SESSION['idUser']);
-                  business_session();
-                  $arrResponse = array('status' => "success", 'msg' => 'ok');
+
+                // Verificar contraseña con bcrypt o AES (compatibilidad)
+                $password_valid = false;
+                if(is_bcrypt($arrData['password'])){
+                    // Nuevo formato bcrypt
+                    $password_valid = verify_password($password, $arrData['password']);
                 }else{
-                  $arrResponse = array('status' => "error", 'msg' => 'El usuario se encuentra desactivado, comuniquese con su administrador.');
+                    // Formato antiguo AES - verificar y migrar
+                    $old_hash = encrypt($password);
+                    if($old_hash === $arrData['password']){
+                        $password_valid = true;
+                        // Migrar a bcrypt
+                        $new_hash = hash_password($password);
+                        $this->model->migrate_password($arrData['id'], $new_hash);
+                        log_security_event('PASSWORD_MIGRATED', "User ID: {$arrData['id']}", 'INFO');
+                    }
+                }
+
+                if(!$password_valid){
+                    record_failed_attempt($rate_key);
+                    log_security_event('LOGIN_FAILED', "Username: {$username} - Wrong password", 'WARNING');
+                    $arrResponse = array('status' => "warning", 'msg' => 'Usuario o contraseña es incorrecta.');
+                }else{
+                    // Login exitoso - limpiar rate limit
+                    clear_rate_limit($rate_key);
+
+                    if($arrData['state'] == 1){
+                      // Regenerar ID de sesión
+                      regenerate_session_id();
+
+                      if(!empty($_POST["remember"])){
+                        $cookie_expiration_time = time() + (365 * 24 * 60 * 60);
+                        setcookie("username",$username,$cookie_expiration_time);
+                      }else{
+                        clearCookie();
+                      }
+                      $_SESSION['idUser'] = $arrData['id'];
+                      $_SESSION['login'] = true;
+                      $_SESSION['last_activity'] = time();
+                      $_SESSION['created'] = time();
+                      $_SESSION['login_ip'] = $_SERVER['REMOTE_ADDR'];
+                      $_SESSION['login_ua'] = $_SERVER['HTTP_USER_AGENT'];
+                      $arrData = $this->model->login_session($_SESSION['idUser']);
+                      user_session($_SESSION['idUser']);
+                      business_session();
+                      
+                      log_security_event('LOGIN_SUCCESS', "User ID: {$_SESSION['idUser']}", 'INFO');
+                      $arrResponse = array('status' => "success", 'msg' => 'ok');
+                    }else{
+                      log_security_event('LOGIN_DISABLED', "Username: {$username}", 'WARNING');
+                      $arrResponse = array('status' => "error", 'msg' => 'El usuario se encuentra desactivado, comuniquese con su administrador.');
+                    }
                 }
               }
             }
@@ -52,37 +112,56 @@
                 if(empty($_POST['email'])){
                     $answer = array('status' => 'error', 'msg' => 'Ingrese un correo electrónico valido.');
                 }else{
+                    // Rate limiting para reset
+                    $rate_key = 'reset_' . $_SERVER['REMOTE_ADDR'];
+                    if(!check_rate_limit($rate_key, 3, 3600)){
+                        $answer = array('status' => 'error', 'msg' => 'Demasiadas solicitudes. Espere una hora.');
+                        echo json_encode($answer,JSON_UNESCAPED_UNICODE);
+                        die();
+                    }
+
                     $token = token();
-                    $email  =  strtolower(strClean($_POST['email']));
+                    $email = sanitize_email($_POST['email']);
+                    
+                    if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+                        $answer = array('status' => 'error', 'msg' => 'Ingrese un correo electrónico válido.');
+                        echo json_encode($answer,JSON_UNESCAPED_UNICODE);
+                        die();
+                    }
+
                     $request = $this->model->validation_email($email);
                     if(empty($request)){
+                        record_failed_attempt($rate_key);
+                        log_security_event('RESET_FAILED', "Email: {$email} - Not found", 'WARNING');
                         $answer = array('status' => 'not_exist', 'msg' => 'No existe ningún operador con este correo.');
                     }else{
+                        clear_rate_limit($rate_key);
                         $iduser = $request['id'];
                         $fullnames = $request['names'].' '.$request['surnames'];
                         $url_recovery = base_url().'/login/restore/'.encrypt($email).'/'.$token;
                         $businness = business_session();
 
                         $data = array(
-                            'logo' => $businness['logo_email'],//logo empresa
-                            'name_sender' => $businness['business_name'],//nombre remitente
-                            'sender' => $businness['email'],//remitente
-                            'password' => $businness['password'],//contraseña
-                            'mobile' => $businness['mobile'],//celular
-                            'address' => $businness['address'],//celular
-                            'host' => $businness['server_host'],//host
-                            'port' => $businness['port'],//puerto
-                            'addressee' => $email,//destinatario
-                            'name_addressee' => $fullnames,//nombre destinatario
-                            'affair' => 'Restablecer su contraseña',//asunto
-                            'url_recovery' => $url_recovery,//link para restablecer contraseña
+                            'logo' => $businness['logo_email'],
+                            'name_sender' => $businness['business_name'],
+                            'sender' => $businness['email'],
+                            'password' => $businness['password'],
+                            'mobile' => $businness['mobile'],
+                            'address' => $businness['address'],
+                            'host' => $businness['server_host'],
+                            'port' => $businness['port'],
+                            'addressee' => $email,
+                            'name_addressee' => $fullnames,
+                            'affair' => 'Restablecer su contraseña',
+                            'url_recovery' => $url_recovery,
                         );
 
                         $result = sendMail($data,"reset");
                         if($result === true){
                             $modify_token = $this->model->update_token($iduser,$token);
                             if($modify_token == 'success'){
-                                $answer = array('status' => 'success', 'msg' => "Se le envio un correo ,revise su bandeja de entrada de su cuenta de correo.");
+                                log_security_event('RESET_REQUESTED', "User ID: {$iduser}", 'INFO');
+                                $answer = array('status' => 'success', 'msg' => "Se le envio un correo, revise su bandeja de entrada.");
                             }else{
                                 $answer = array('status' => false, 'msg' => 'No es posible realizar el proceso, intenta más tarde.');
                             }
@@ -126,36 +205,41 @@
                 $id = intval($id);
                 $password = $_POST['password'];
                 $passwordConfirm = $_POST['passwordConfirm'];
-                $email = strClean($_POST['email']);
-                $token = strClean($_POST['token']);
+                $email = sanitize_string($_POST['email']);
+                $token = sanitize_string($_POST['token']);
 
-                if($password != $passwordConfirm){
-                    $answer = array('status' => 'error',  'msg' => 'Las contraseñas no coinciden.' );
+                // Validar fortaleza de contraseña
+                if(strlen($password) < 8){
+                    $answer = array('status' => 'error', 'msg' => 'La contraseña debe tener al menos 8 caracteres.');
+                }else if($password != $passwordConfirm){
+                    $answer = array('status' => 'error', 'msg' => 'Las contraseñas no coinciden.');
                 }else{
                     $request = $this->model->user_information($email,$token);
                     if(empty($request)){
-                        $answer = array('status' => 'error', 'msg' => 'No se encontro información del usuario.' );
+                        $answer = array('status' => 'error', 'msg' => 'No se encontró información del usuario.');
                     }else{
-                        $password = encrypt($_POST['password']);
-                        $modify = $this->model->update_password($id,$password);
+                        // Usar bcrypt para nueva contraseña
+                        $password_hash = hash_password($password);
+                        $modify = $this->model->update_password($id, $password_hash);
                         if($modify == 'success'){
                             $businness = business_session();
                             $data = array(
-                                'logo' => $businness['logo_email'],//logo empresa
-                                'name_sender' => $businness['business_name'],//nombre remitente
-                                'sender' => $businness['email'],//remitente
-                                'password' => $businness['password'],//contraseña
-                                'mobile' => $businness['mobile'],//celular
-                                'address' => $businness['address'],//celular
-                                'host' => $businness['server_host'],//host
-                                'port' => $businness['port'],//puerto
-                                'addressee' => $email,//destinatario
-                                'name_addressee' => $request['names']." ".$request['surnames'],//nombre destinatario
-                                'affair' => 'Tu contraseña ha sido restablecida',//asunto
+                                'logo' => $businness['logo_email'],
+                                'name_sender' => $businness['business_name'],
+                                'sender' => $businness['email'],
+                                'password' => $businness['password'],
+                                'mobile' => $businness['mobile'],
+                                'address' => $businness['address'],
+                                'host' => $businness['server_host'],
+                                'port' => $businness['port'],
+                                'addressee' => $email,
+                                'name_addressee' => $request['names']." ".$request['surnames'],
+                                'affair' => 'Tu contraseña ha sido restablecida',
                             );
 
                             $result = sendMail($data,"change_password");
                             if($result === true){
+                                log_security_event('PASSWORD_RESET', "User ID: {$id}", 'INFO');
                                 $answer = array('status' => 'success', 'msg' => 'Tu contraseña ha sido restablecida.');
                             }else{
                                $answer = array('status' => 'error', 'msg' => "No es posible realizar el proceso, intenta más tarde.");

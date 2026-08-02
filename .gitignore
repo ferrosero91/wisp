@@ -13,6 +13,7 @@
 error_log
 error_log.php
 *.log
+Logs/
 
 # Dependencias de vendor (se instalan con composer)
 Libraries/dompdf/vendor/
@@ -28,3 +29,8 @@ Thumbs.db
 
 # Composer
 composer.lock
+
+apidian/
+
+# Certificados digitales (sensibles)
+Assets/uploads/certificates/

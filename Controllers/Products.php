@@ -52,7 +52,9 @@
             die();
         }
         public function list_records(){
-            if($_SESSION['permits_module']['v']){
+            if(empty($_SESSION['permits_module']['v'])){
+                send_json([]);
+            }
                 $data = $this->model->list_records();
                 for($i=0; $i < count($data); $i++){
                     /* ID PRODUCTO ENCRYTADO */
@@ -104,8 +106,7 @@
                     </div></div>';
                     $data[$i]['options'] = $options;
                 }
-                echo json_encode($data,JSON_UNESCAPED_UNICODE);
-            }
+                send_json($data);
             die();
         }
         public function list_products(){

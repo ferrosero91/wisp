@@ -108,13 +108,15 @@
     }
     /* MODULO CLIENTES Y CONTRATOS */
     public function list_records(string $params){
-      if($_SESSION['permits_module']['v']){
-        if(!empty($params)){
-          $arrParams = explode("-",$params);
-          $state = intval($arrParams[0]);
-        }else{
-          $state = 0;
-        }
+      if(empty($_SESSION['permits_module']['v'])){
+        send_json([]);
+      }
+      if(!empty($params)){
+        $arrParams = explode("-",$params);
+        $state = intval($arrParams[0]);
+      }else{
+        $state = 0;
+      }
         $data = $this->model->list_records($state);
         for($i=0; $i < count($data); $i++){
           /* VARIABLES */
@@ -264,8 +266,7 @@
           </div></div></div>';
           $data[$i]['options'] = $options;
         }
-        echo json_encode($data,JSON_UNESCAPED_UNICODE);
-      }
+        send_json($data);
       die();
     }
     public function register_contract(){

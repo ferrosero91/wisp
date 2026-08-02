@@ -6,6 +6,10 @@ $(document).on('click', 'body', function(e) {
   document.querySelector(".search-input").classList.remove("active");
   document.querySelector('#box-search').innerHTML = "";
 });
+function search_pending_bills(document_number){
+  $('#search_client').val(document_number).trigger('keyup');
+}
+if(number_client){
 number_client.onpaste = function(event){
   var str = event.clipboardData.getData('text/plain');
   matches = str.match(/\d+/g);
@@ -38,6 +42,7 @@ number_client.onpaste = function(event){
   $(this).val(values);
   event.preventDefault();
 };
+}
 function massive_runway(){
   if(document.querySelector('#typepay')){
     var ajaxUrl = base_url+'/runway/list_runway';

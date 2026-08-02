@@ -18,6 +18,9 @@ var footer = '<table  class="table table-bordered text-center">'+
 '<tr><td class="canceled_detail f-s-12">ANULADAS</td>'+
 '<td class="canceled_amount f-s-12">0</td>'+
 '<td class="canceled_total f-s-12">0</td><td class="canceled_subtotal f-s-12">0</td></tr>'+
+'<tr><td class="elec_detail f-s-12" style="background:#e9ecef;">ANULADAS ELECT.</td>'+
+'<td class="elec_amount f-s-12" style="background:#e9ecef;">0</td>'+
+'<td class="elec_total f-s-12" style="background:#e9ecef;">0</td><td class="elec_subtotal f-s-12" style="background:#e9ecef;">0</td></tr>'+
 '<tr class="table-active"><td class="totales_detail f-w-600 f-s-12">TOTALES</td>'+
 '<td class="total_amount f-w-600 f-s-12">0</td>'+
 '<td class="total_total f-w-600 f-s-12">0</td><td class="total_subtotal f-w-600 f-s-12">0</td></tr>'+
@@ -78,16 +81,15 @@ document.addEventListener('DOMContentLoaded', function(){
             {"data":"observation"},
             {"data":"state","render": function(data,type,full,meta){
                 var state = '';
-                if(data == 1){
+                if(full.count_state === 'ANULADA ELECT.'){
+                    state = '<span class="label label-dark" style="background:#6c757d;"><i class="fas fa-ban mr-1"></i>ANULADA ELECT.</span>';
+                } else if(data == 1){
                     state = '<span class="label label-success">PAGADO</span>';
-                }
-                if(data == 2){
+                } else if(data == 2){
                     state = '<span class="label label-warning">PENDIENTE</span>';
-                }
-                if(data == 3){
+                } else if(data == 3){
                     state = '<span class="label label-danger">VENCIDO</span>';
-                }
-                if(data == 4){
+                } else if(data == 4){
                     state = '<span class="label label-dark">ANULADO</span>';
                 }
                 return state;
@@ -99,6 +101,7 @@ document.addEventListener('DOMContentLoaded', function(){
             var unpaid_amount = 0,unpaid_subtotal = 0,unpaid_total = 0;
             var expired_amount = 0,expired_subtotal = 0,expired_total = 0;
             var canceled_amount = 0,canceled_subtotal = 0,canceled_total = 0;
+            var elec_amount = 0,elec_subtotal = 0,elec_total = 0;
             var api = this.api().rows({search:'applied'}).data();
             $.each(api, function( key, value ){
                   switch (value['count_state']){
@@ -122,11 +125,16 @@ document.addEventListener('DOMContentLoaded', function(){
                       canceled_subtotal += parseFloat(value['count_subtotal']);
                       canceled_total += parseFloat(value['count_total']);
                       break;
+                      case "ANULADA ELECT.":
+                      elec_amount++;
+                      elec_subtotal += parseFloat(value['count_subtotal']);
+                      elec_total += parseFloat(value['count_total']);
+                      break;
                   }
             });
-            var total_amount = paid_amount + unpaid_amount + expired_amount + canceled_amount;
-            var total_subtotal = paid_subtotal + unpaid_subtotal + expired_subtotal + canceled_subtotal;
-            var total_total = paid_total + unpaid_total + expired_total + canceled_total;
+            var total_amount = paid_amount + unpaid_amount + expired_amount + canceled_amount + elec_amount;
+            var total_subtotal = paid_subtotal + unpaid_subtotal + expired_subtotal + canceled_subtotal + elec_subtotal;
+            var total_total = paid_total + unpaid_total + expired_total + canceled_total + elec_total;
             $('.invoice_summary').html(footer);
             $('.paid_amount').html(paid_amount);
             $('.paid_subtotal').html(currency_symbol+roundNumber(paid_subtotal,2));
@@ -140,6 +148,9 @@ document.addEventListener('DOMContentLoaded', function(){
             $('.canceled_amount').html(canceled_amount);
             $('.canceled_subtotal').html(currency_symbol+roundNumber(canceled_subtotal,2));
             $('.canceled_total').html(currency_symbol+roundNumber(canceled_total,2));
+            $('.elec_amount').html(elec_amount);
+            $('.elec_subtotal').html(currency_symbol+roundNumber(elec_subtotal,2));
+            $('.elec_total').html(currency_symbol+roundNumber(elec_total,2));
             $('.total_amount').html(total_amount);
             $('.total_subtotal').html(currency_symbol+roundNumber(total_subtotal,2));
             $('.total_total').html(currency_symbol+roundNumber(total_total,2));
@@ -1426,4 +1437,241 @@ function exports(){
         alert_msg('success','Se exporto excel correctamente.');
         window.open(base_url+'/bills/export', '_blank');
     }, 1000);
+}
+/* ENVIAR FACTURA A DIAN */
+function send_to_dian(idbill){
+    if(!confirm('¿Está seguro de enviar esta factura a la DIAN?')) return;
+    
+    $('[data-toggle="tooltip"]').tooltip('hide');
+    loading.style.display = "flex";
+    
+    var formData = new FormData();
+    formData.append('idbill', idbill);
+    
+    var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+    request.open("POST", base_url+'/electronicinvoice/send_to_dian', true);
+    
+    request.onload = function() {
+        loading.style.display = "none";
+        if (request.status === 200) {
+            try {
+                var objData = JSON.parse(request.responseText);
+                if (objData.status === "success") {
+                    $.confirm({
+                        theme: 'modern',
+                        draggable: false,
+                        closeIcon: true,
+                        animationBounce: 2.5,
+                        type: 'success',
+                        icon: 'far fa-check-circle',
+                        title: 'FACTURA AUTORIZADA',
+                        content: objData.msg + 
+                                 '<br><br><strong>CUFE:</strong><br><code style="word-break:break-all;font-size:11px;">' + (objData.cufe || 'N/A') + '</code>',
+                        buttons: {
+                            ok: {
+                                text: 'Aceptar',
+                                btnClass: 'btn-success'
+                            }
+                        }
+                    });
+                    // Recargar tabla de facturas
+                    if(typeof table_bills !== 'undefined'){
+                        table_bills.ajax.reload();
+                    }
+                } else {
+                    alert_msg("error", objData.msg || "Error desconocido");
+                }
+            } catch (parseError) {
+                console.error('Respuesta del servidor:', request.responseText);
+                alert_msg("error", "Error al procesar la respuesta del servidor");
+            }
+        } else {
+            alert_msg("error", "Error del servidor: " + request.status);
+        }
+    };
+    
+    request.onerror = function() {
+        loading.style.display = "none";
+        alert_msg("error", "Error de conexión con el servidor");
+    };
+    
+    request.send(formData);
+}
+/* VER FACTURA ELECTRONICA */
+function view_electronic_invoice(idbill){
+    window.open(base_url+'/electronicinvoice/view_electronic/'+idbill, '_blank');
+}
+/* VER NOTA CREDITO ELECTRONICA */
+function view_credit_note(idbill){
+    window.open(base_url+'/electronicinvoice/view_credit_note/'+idbill, '_blank');
+}
+/* NOTA CREDITO */
+function show_credit_note_modal(idbill){
+    // Cargar motivos de nota crédito
+    var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+    request.open("GET", base_url+'/electronicinvoice/get_credit_note_reasons', true);
+    request.onload = function() {
+        if(request.status === 200){
+            var reasons = JSON.parse(request.responseText);
+            var options = '<option value="">Seleccione motivo...</option>';
+            for(var i = 0; i < reasons.length; i++){
+                options += '<option value="'+reasons[i].id+'">'+reasons[i].name+'</option>';
+            }
+            
+            $.confirm({
+                theme: 'modern',
+                title: 'EMITIR NOTA CRÉDITO',
+                content: '' +
+                    '<form class="form-group">' +
+                    '<label>Motivo de la Nota Crédito:</label>' +
+                    '<select id="nc_reason" class="form-control mb-2">' + options + '</select>' +
+                    '<label>Descripción:</label>' +
+                    '<textarea id="nc_description" class="form-control mb-2" rows="3" placeholder="Describa el motivo..."></textarea>' +
+                    '<label>Observaciones (opcional):</label>' +
+                    '<textarea id="nc_notes" class="form-control" rows="2" placeholder="Observaciones adicionales..."></textarea>' +
+                    '</form>',
+                buttons: {
+                    confirm: {
+                        text: 'Emitir Nota Crédito',
+                        btnClass: 'btn-warning',
+                        action: function(){
+                            var reason = document.getElementById('nc_reason').value;
+                            var desc = document.getElementById('nc_description').value;
+                            var notes = document.getElementById('nc_notes').value;
+                            
+                            if(!reason){
+                                alert('Seleccione un motivo');
+                                return false;
+                            }
+                            if(!desc){
+                                alert('Ingrese una descripción');
+                                return false;
+                            }
+                            
+                            send_credit_note(idbill, reason, desc, notes);
+                        }
+                    },
+                    cancel: { text: 'Cancelar', btnClass: 'btn-secondary' }
+                }
+            });
+        }
+    };
+    request.send();
+}
+
+function send_credit_note(idbill, reason, desc, notes){
+    loading.style.display = "flex";
+    var formData = new FormData();
+    formData.append('idbill', idbill);
+    formData.append('discrepancy_code', reason);
+    formData.append('discrepancy_desc', desc);
+    formData.append('notes', notes);
+    
+    var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+    request.open("POST", base_url+'/electronicinvoice/send_credit_note', true);
+    request.onload = function() {
+        loading.style.display = "none";
+        if(request.status === 200){
+            try {
+                var obj = JSON.parse(request.responseText);
+                if(obj.status === 'success'){
+                    alert_msg("success", obj.msg + (obj.number ? '<br><strong>Número:</strong> ' + obj.number : '') + (obj.cude ? '<br><strong>CUDE:</strong> <code style="word-break:break-all;font-size:11px;">'+obj.cude+'</code>' : ''));
+                    if(typeof table_bills !== 'undefined') table_bills.ajax.reload();
+                } else {
+                    alert_msg("error", obj.msg || "Error al enviar nota crédito");
+                }
+            } catch(e) {
+                alert_msg("error", "Error al procesar la respuesta del servidor");
+            }
+        } else {
+            alert_msg("error", "Error del servidor: " + request.status);
+        }
+    };
+    request.onerror = function() {
+        loading.style.display = "none";
+        alert_msg("error", "Error de conexión con el servidor");
+    };
+    request.send(formData);
+}
+
+/* NOTA DEBITO */
+function show_debit_note_modal(idbill){
+    var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+    request.open("GET", base_url+'/electronicinvoice/get_debit_note_reasons', true);
+    request.onload = function() {
+        if(request.status === 200){
+            var reasons = JSON.parse(request.responseText);
+            var options = '<option value="">Seleccione motivo...</option>';
+            for(var i = 0; i < reasons.length; i++){
+                options += '<option value="'+reasons[i].id+'">'+reasons[i].name+'</option>';
+            }
+            
+            $.confirm({
+                theme: 'modern',
+                title: 'EMITIR NOTA DÉBITO',
+                content: '' +
+                    '<form class="form-group">' +
+                    '<label>Motivo de la Nota Débito:</label>' +
+                    '<select id="nd_reason" class="form-control mb-2">' + options + '</select>' +
+                    '<label>Descripción:</label>' +
+                    '<textarea id="nd_description" class="form-control mb-2" rows="3" placeholder="Describa el motivo..."></textarea>' +
+                    '<label>Observaciones (opcional):</label>' +
+                    '<textarea id="nd_notes" class="form-control" rows="2" placeholder="Observaciones adicionales..."></textarea>' +
+                    '</form>',
+                buttons: {
+                    confirm: {
+                        text: 'Emitir Nota Débito',
+                        btnClass: 'btn-danger',
+                        action: function(){
+                            var reason = document.getElementById('nd_reason').value;
+                            var desc = document.getElementById('nd_description').value;
+                            var notes = document.getElementById('nd_notes').value;
+                            
+                            if(!reason){ alert('Seleccione un motivo'); return false; }
+                            if(!desc){ alert('Ingrese una descripción'); return false; }
+                            
+                            send_debit_note(idbill, reason, desc, notes);
+                        }
+                    },
+                    cancel: { text: 'Cancelar', btnClass: 'btn-secondary' }
+                }
+            });
+        }
+    };
+    request.send();
+}
+
+function send_debit_note(idbill, reason, desc, notes){
+    loading.style.display = "flex";
+    var formData = new FormData();
+    formData.append('idbill', idbill);
+    formData.append('discrepancy_code', reason);
+    formData.append('discrepancy_desc', desc);
+    formData.append('notes', notes);
+    
+    var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+    request.open("POST", base_url+'/electronicinvoice/send_debit_note', true);
+    request.onload = function() {
+        loading.style.display = "none";
+        if(request.status === 200){
+            try {
+                var obj = JSON.parse(request.responseText);
+                if(obj.status === 'success'){
+                    alert_msg("success", obj.msg + (obj.number ? '<br><strong>Número:</strong> ' + obj.number : '') + (obj.cude ? '<br><strong>CUDE:</strong> <code style="word-break:break-all;font-size:11px;">'+obj.cude+'</code>' : ''));
+                    if(typeof table_bills !== 'undefined') table_bills.ajax.reload();
+                } else {
+                    alert_msg("error", obj.msg || "Error al enviar nota débito");
+                }
+            } catch(e) {
+                alert_msg("error", "Error al procesar la respuesta del servidor");
+            }
+        } else {
+            alert_msg("error", "Error del servidor: " + request.status);
+        }
+    };
+    request.onerror = function() {
+        loading.style.display = "none";
+        alert_msg("error", "Error de conexión con el servidor");
+    };
+    request.send(formData);
 }

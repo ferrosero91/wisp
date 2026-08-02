@@ -33,6 +33,8 @@
         }
         $data['page_name'] = "Registrar pagos";
         $data['page_functions_js'] = "add_payment.js";
+        $arrPending = $this->model->clients_with_pending_bills();
+        $data['pending_clients'] = !empty($arrPending) ? $arrPending : array();
         $this->views->getView($this,"add",$data);
       }
       public function statistics(){
@@ -203,7 +205,9 @@
         die();
       }
       public function list_records(){
-          if($_SESSION['permits_module']['v']){
+          if(empty($_SESSION['permits_module']['v'])){
+            send_json([]);
+          }
             if(empty($_GET['start']) && empty($_GET['end'])){
               $start = date("Y-m-01");
               $end = date("Y-m-t");
@@ -276,8 +280,7 @@
                   </div></div>';
                   $data[$i]['options'] = $options;
               }
-              echo json_encode($data,JSON_UNESCAPED_UNICODE);
-          }
+              send_json($data);
           die();
       }
       public function modify_payment(){
@@ -364,6 +367,30 @@
               echo json_encode($answer,JSON_UNESCAPED_UNICODE);
           }
           die();
+      }
+      public function clients_with_pending_bills(){
+        $arrData = $this->model->clients_with_pending_bills();
+        $html = "";
+        if(!empty($arrData)){
+          $symbol = isset($_SESSION['businessData']['symbol']) ? $_SESSION['businessData']['symbol'] : 'S/';
+          $html .= '<table class="table table-sm table-hover table-striped"><thead><tr><th>Cliente</th><th>Documento</th><th>Deuda Total</th><th>Vence</th><th>Accion</th></tr></thead><tbody>';
+          foreach($arrData as $row){
+            $total = $symbol.format_money($row['total_debt']);
+            $vence = date('d/m/Y', strtotime($row['next_expiration']));
+            $html .= '<tr>';
+            $html .= '<td>'.htmlspecialchars($row['names']).' '.htmlspecialchars($row['surnames']).'</td>';
+            $html .= '<td>'.htmlspecialchars($row['document']).'</td>';
+            $html .= '<td class="font-weight-bold text-danger">'.$total.'</td>';
+            $html .= '<td>'.$vence.'</td>';
+            $html .= '<td><button class="btn btn-sm btn-primary" onclick="search_pending_bills(\''.addslashes($row['document']).'\')"><i class="fas fa-search"></i> Verificar</button></td>';
+            $html .= '</tr>';
+          }
+          $html .= '</tbody></table>';
+        }else{
+          $html = '<div class="text-center text-muted p-3"><i class="fas fa-check-circle fa-2x mb-2"></i><p>No hay clientes con deudas pendientes</p></div>';
+        }
+        echo $html;
+        die();
       }
       public function search_clients(){
         if($_POST){

@@ -10,7 +10,7 @@
 			consent_permission(SERVICES);
         }
         public function list_records(){
-            if($_SESSION['permits_module']['v']){
+            if(empty($_SESSION['permits_module']['v'])){ send_json([]); }
                 $n = 1;
                 $data = $this->model->list_records();
                 for($i=0; $i < count($data); $i++){
@@ -44,8 +44,7 @@
                     </div></div>';
                     $data[$i]['options'] = $options;
                 }
-                echo json_encode($data,JSON_UNESCAPED_UNICODE);
-            }
+                send_json($data);
             die();
         }
         public function select_record(string $idservices){

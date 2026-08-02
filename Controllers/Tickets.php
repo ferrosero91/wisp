@@ -191,7 +191,9 @@
       die();
     }
     public function list_current(){
-      if($_SESSION['permits_module']['v']){
+      if(empty($_SESSION['permits_module']['v'])){
+        send_json([]);
+      }
           $ticket = isset($_GET['ticket']) ? intVal($_GET['ticket']) : 0;
           $current = date('Y-m-d');
           if($ticket == 0){
@@ -307,12 +309,13 @@
             </div></div>';
             $data[$i]['options'] = $options;
           }
-          echo json_encode($data,JSON_UNESCAPED_UNICODE);
-      }
+          send_json($data);
       die();
     }
     public function list_expired(){
-        if($_SESSION['permits_module']['v']){
+        if(empty($_SESSION['permits_module']['v'])){
+          send_json([]);
+        }
           $ticket = isset($_GET['ticket']) ? intVal($_GET['ticket']) : 0;
           $affair = isset($_GET['affair']) ? intVal($_GET['affair']) : 0;
           $state = isset($_GET['state']) ? intVal($_GET['state']) : 0;
@@ -416,12 +419,13 @@
               </div></div>';
               $data[$i]['options'] = $options;
             }
-            echo json_encode($data,JSON_UNESCAPED_UNICODE);
-        }
+            send_json($data);
         die();
     }
     public function list_resolved(){
-        if($_SESSION['permits_module']['v']){
+        if(empty($_SESSION['permits_module']['v'])){
+          send_json([]);
+        }
           if(empty($_GET['closing'])){
             $closing = date("Y-m-d");
           }else{
@@ -562,12 +566,13 @@
                 </div></div>';
                 $data[$i]['options'] = $options;
             }
-            echo json_encode($data,JSON_UNESCAPED_UNICODE);
-        }
+            send_json($data);
         die();
     }
     public function list_records(){
-        if($_SESSION['permits_module']['v']){
+        if(empty($_SESSION['permits_module']['v'])){
+          send_json([]);
+        }
             $state = isset($_GET['state']) ? intVal($_GET['state']) : 0;
             $user = isset($_GET['user']) ? intVal($_GET['user']) : 0;
             $affair = isset($_GET['affair']) ? intVal($_GET['affair']) : 0;
@@ -736,8 +741,7 @@
                 </div></div>';
                 $data[$i]['options'] = $options;
             }
-            echo json_encode($data,JSON_UNESCAPED_UNICODE);
-        }
+            send_json($data);
         die();
     }
     public function action(){

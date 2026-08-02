@@ -156,4 +156,50 @@
 			}
 			return $answer;
     }
+
+    // ============================================================
+    // MÉTODOS BCRYPT
+    // ============================================================
+
+    /**
+     * Obtiene usuario por username (para login)
+     */
+    public function get_user_by_username(string $username){
+        $this->strUsername = $username;
+        $sql = "SELECT id, username, password, state FROM users WHERE username = ? AND state != 0";
+        $data = array($this->strUsername);
+        $request = $this->select($sql, $data);
+        return $request;
+    }
+
+    /**
+     * Migra contraseña de AES a bcrypt
+     */
+    public function migrate_password(int $id, string $new_hash){
+        $this->intId = $id;
+        $this->strPassword = $new_hash;
+        $query = "UPDATE users SET password = ? WHERE id = ?";
+        $data = array($this->strPassword, $this->intId);
+        $update = $this->update($query, $data);
+        return $update ? 'success' : 'error';
+    }
+
+    /**
+     * Obtiene hash de contraseña por ID
+     */
+    public function get_password_hash(int $id){
+        $this->intId = $id;
+        $sql = "SELECT password FROM users WHERE id = ?";
+        $data = array($this->intId);
+        $request = $this->select($sql, $data);
+        return $request['password'] ?? null;
+    }
+
+    /**
+     * Verifica si el usuario tiene contraseña bcrypt
+     */
+    public function has_bcrypt_password(int $id): bool {
+        $hash = $this->get_password_hash($id);
+        return $hash !== null && substr($hash, 0, 4) === '$2y$';
+    }
     }

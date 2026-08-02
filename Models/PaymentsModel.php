@@ -296,6 +296,19 @@
 			$request = $this->select_all($sql);
 			return $request;
 		}
+		public function clients_with_pending_bills(){
+			$sql = "SELECT c.id,c.names,c.surnames,c.document,c.mobile,c.mobile_optional,c.address,
+				COUNT(b.id) AS pending_bills,
+				COALESCE(SUM(b.remaining_amount),0) AS total_debt,
+				MIN(b.expiration_date) AS next_expiration
+			FROM clients c
+			INNER JOIN bills b ON c.id = b.clientid
+			WHERE b.state IN(2,3) AND b.remaining_amount > 0
+			GROUP BY c.id, c.names, c.surnames, c.document, c.mobile, c.mobile_optional, c.address
+			ORDER BY total_debt DESC";
+			$request = $this->select_all($sql);
+			return $request;
+		}
 		public function pending_invoices(int $client){
 			$request = array();
 			$sql_pending = "SELECT COUNT(*) AS total,COALESCE(SUM(remaining_amount),0) AS amount FROM bills WHERE state NOT IN(0,1,4)  AND clientid = $client";

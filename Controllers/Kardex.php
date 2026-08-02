@@ -46,7 +46,9 @@
             die();
         }
         public function list_records(){
-            if($_SESSION['permits_module']['v']){
+            if(empty($_SESSION['permits_module']['v'])){
+                send_json([]);
+            }
                 $data = $this->model->list_records();
                 for($i=0; $i < count($data); $i++){
                     $view = '';
@@ -63,8 +65,7 @@
                     $data[$i]['cost_balance'] = $_SESSION['businessData']['symbol'].format_money($data[$i]['cost_balance']);
                     $data[$i]['total_balance'] = $_SESSION['businessData']['symbol'].format_money($data[$i]['total_balance']);
                 }
-                echo json_encode($data,JSON_UNESCAPED_UNICODE);
-            }
+                send_json($data);
             die();
         }
     }

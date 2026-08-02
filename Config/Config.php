@@ -91,6 +91,30 @@ define('TECHNICAL', 2);
 define('CHARGES', 3);
 
 /* ============================================================
+ * FACTURACION ELECTRONICA (APIDIAN)
+ * ============================================================ */
+define('APIDIAN_URL', env('APIDIAN_URL', ''));
+define('APIDIAN_TOKEN', env('APIDIAN_TOKEN', ''));
+define('APIDIAN_NIT', env('APIDIAN_NIT', ''));
+define('APIDIAN_DV', env('APIDIAN_DV', ''));
+define('APIDIAN_ENVIRONMENT', env('APIDIAN_ENVIRONMENT', 'habilitacion'));
+define('APIDIAN_PREFIX', env('APIDIAN_PREFIX', 'SETP'));
+define('APIDIAN_RESOLUTION', env('APIDIAN_RESOLUTION', ''));
+define('APIDIAN_RESOLUTION_FROM', env('APIDIAN_RESOLUTION_FROM', 1));
+define('APIDIAN_RESOLUTION_TO', env('APIDIAN_RESOLUTION_TO', 999999999));
+
+/* Tipos de documento DIAN */
+define('DIAN_INVOICE', 1);           // Factura electrónica
+define('DIAN_CREDIT_NOTE', 4);       // Nota crédito
+define('DIAN_DEBIT_NOTE', 5);        // Nota débito
+define('DIAN_SUPPORT_DOCUMENT', 11); // Documento soporte
+
+/* Estados de facturación electrónica */
+define('EINVOICE_PENDING', 0);
+define('EINVOICE_AUTHORIZED', 1);
+define('EINVOICE_REJECTED', 2);
+
+/* ============================================================
  * ENTORNO DE EJECUCION
  * ============================================================ */
 define('APP_ENV', env('APP_ENV', "development"));
@@ -98,28 +122,84 @@ define('APP_DEBUG', env('APP_DEBUG', "true") === "true" ? true : false);
 
 /* Manejo de errores: en produccion no mostrar, solo registrar */
 if (APP_DEBUG) {
-    error_reporting(E_ALL);
-    ini_set('display_errors', '1');
+    error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_USER_NOTICE & ~E_WARNING);
+    ini_set('display_errors', '0');
+    ini_set('log_errors', '1');
+    ini_set('error_log', __DIR__ . "/../error_log.php");
 } else {
-    error_reporting(E_ALL);
+    error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_USER_NOTICE & ~E_WARNING);
     ini_set('display_errors', '0');
     ini_set('log_errors', '1');
     ini_set('error_log', __DIR__ . "/../error_log.php");
 }
 
+/* Error handler personalizado para evitar output en JSON */
+set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    $log_dir = __DIR__ . '/../Logs';
+    if (!is_dir($log_dir)) {
+        mkdir($log_dir, 0755, true);
+    }
+    $log_file = $log_dir . '/php_errors_' . date('Y-m-d') . '.log';
+    $message = date('Y-m-d H:i:s') . " [$errno] $errstr in $errfile on line $errline\n";
+    file_put_contents($log_file, $message, FILE_APPEND | LOCK_EX);
+    return true; // Prevenir output PHP
+});
+
+/* Exception handler para errores fatales */
+set_exception_handler(function($exception) {
+    $log_dir = __DIR__ . '/../Logs';
+    if (!is_dir($log_dir)) {
+        mkdir($log_dir, 0755, true);
+    }
+    $log_file = $log_dir . '/php_errors_' . date('Y-m-d') . '.log';
+    $message = date('Y-m-d H:i:s') . " [EXCEPTION] " . get_class($exception) . ": " . $exception->getMessage() . 
+               " in " . $exception->getFile() . " on line " . $exception->getLine() . "\n";
+    $message .= "Stack trace:\n" . $exception->getTraceAsString() . "\n\n";
+    file_put_contents($log_file, $message, FILE_APPEND | LOCK_EX);
+    
+    // Si es una petición JSON o AJAX, enviar respuesta JSON
+    $is_ajax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+               strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+    $is_json = isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false;
+    $wants_json = $is_ajax || $is_json;
+    
+    if ($wants_json) {
+        header('Content-Type: application/json; charset=UTF-8');
+        echo json_encode(['status' => 'error', 'msg' => 'Error: ' . $exception->getMessage()]);
+    } else {
+        echo '<h1>Error del servidor</h1><p>' . htmlspecialchars($exception->getMessage()) . '</p>';
+    }
+    exit;
+});
+
 /* Endurecimiento de sesion */
-ini_set('session.use_strict_mode', '1');
-ini_set('session.use_only_cookies', '1');
-ini_set('session.cookie_httponly', '1');
-ini_set('session.cookie_samesite', 'Lax');
-if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
-    ini_set('session.cookie_secure', '1');
+if (session_status() === PHP_SESSION_NONE) {
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.use_only_cookies', '1');
+    ini_set('session.cookie_httponly', '1');
+    ini_set('session.cookie_samesite', 'Lax');
+    ini_set('session.use_trans_sid', '0');
+    if (PHP_VERSION_ID < 80400) {
+        ini_set('session.sid_length', '64');
+    }
+    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        ini_set('session.cookie_secure', '1');
+    }
+}
+
+/* Output buffering para evitar warnings en respuestas JSON */
+if (!ob_get_level()) {
+    ob_start();
 }
 
 /* Cabeceras de seguridad */
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');
+header('X-XSS-Protection: 1; mode=block');
+header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
 if (APP_DEBUG === false) {
     header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
+    // Content Security Policy
+    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'");
 }

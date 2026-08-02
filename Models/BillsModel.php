@@ -788,4 +788,16 @@
 					$total =   $answer['total'];
 			return $total;
 		}
+		public function check_electronic_invoice(int $billid){
+			$sql = "SELECT * FROM electronic_invoices WHERE billid = ? AND type_document = 'invoice' ORDER BY id DESC LIMIT 1";
+			$data = array($billid);
+			$answer = $this->select($sql, $data);
+			return $answer;
+		}
+		public function check_credit_note(int $billid){
+			$sql = "SELECT * FROM electronic_invoices WHERE billid = ? AND type_document = 'credit-note' AND electronic_state = 1 ORDER BY id DESC LIMIT 1";
+			$data = array($billid);
+			$answer = $this->select($sql, $data);
+			return $answer;
+		}
 	}

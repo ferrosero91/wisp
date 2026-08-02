@@ -137,7 +137,7 @@
     <!-- ================== FIN API GOOGLE MAPS JS ================== -->
     <?php if(isset($data['page_functions_js'])){ ?>
     <!-- ================== INICIO FUNCION JS ============ -->
-    <script src="<?= base_style() ?>/js/functions/<?= $data['page_functions_js']; ?>"></script>
+    <script src="<?= base_style() ?>/js/functions/<?= $data['page_functions_js']; ?>?v=2026080101"></script>
     <!-- ================== FIN FUNCION JS =============== -->
      <?php } ?>
     </body>

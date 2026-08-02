@@ -57,7 +57,9 @@
       }
     }
     public function transactions_month(string $params){
-      if($_SESSION['permits_module']['v']){
+      if(empty($_SESSION['permits_module']['v'])){
+        send_json(['status' => 'error', 'msg' => 'Sin permisos']);
+      }
         if(!empty($params)){
           $arrParams = explode("-",$params);
           $month = intval($arrParams[0]);
@@ -72,12 +74,13 @@
         }else{
           $answer = array('status' => 'success', 'data' => $data);
         }
-        echo json_encode($answer,JSON_UNESCAPED_UNICODE);
-      }
+        send_json($answer);
       die();
     }
     public function payments_type(string $params){
-      if($_SESSION['permits_module']['v']){
+      if(empty($_SESSION['permits_module']['v'])){
+        send_json(['status' => 'error', 'msg' => 'Sin permisos']);
+      }
         if(!empty($params)){
           $arrParams = explode("-",$params);
           $month = intval($arrParams[0]);
@@ -92,12 +95,13 @@
         }else{
           $answer = array('status' => 'success', 'data' => $data);
         }
-        echo json_encode($answer,JSON_UNESCAPED_UNICODE);
-      }
+        send_json($answer);
       die();
     }
     public function libre_services(string $year){
-      if($_SESSION['permits_module']['v']){
+      if(empty($_SESSION['permits_module']['v'])){
+        send_json(['status' => 'error', 'msg' => 'Sin permisos']);
+      }
         $year = !empty($year) ? intval($year) : date('Y');
         $data = $this->model->libre_services($year);
         if(empty($data)){
@@ -105,11 +109,13 @@
         }else{
           $answer = array('status' => 'success', 'data' => $data);
         }
-        echo json_encode($answer,JSON_UNESCAPED_UNICODE);
-      }
+        send_json($answer);
       die();
     }
     public function list_paymentes(){
+      if(empty($_SESSION['login'])){
+        send_json([]);
+      }
       $user = intval($_SESSION['idUser']);
       $data = $this->model->list_paymentes($user);
       for($i=0; $i < count($data); $i++){
@@ -120,7 +126,7 @@
         $data[$i]['amount_paid'] = $_SESSION['businessData']['symbol'].format_money($data[$i]['amount_paid']);
         $data[$i]['bill_total'] = $_SESSION['businessData']['symbol'].format_money($data[$i]['bill_total']);
       }
-      echo json_encode($data,JSON_UNESCAPED_UNICODE);
+      send_json($data);
       die();
     }
   }

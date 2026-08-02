@@ -24,7 +24,9 @@ use Verot\Upload\Upload;
             $this->views->getView($this,"users",$data);
         }
         public function list_records(){
-            if($_SESSION['permits_module']['v']){
+            if(empty($_SESSION['permits_module']['v'])){
+                send_json([]);
+            }
                 $n = 1;
 	            $data = $this->model->list_records();
 	            for($i=0; $i < count($data); $i++){
@@ -75,8 +77,7 @@ use Verot\Upload\Upload;
                     </div></div>';
                     $data[$i]['options'] = $options;
                 }
-                echo json_encode($data,JSON_UNESCAPED_UNICODE);
-            }
+                send_json($data);
             die();
         }
         public function select_record(string $iduser){
@@ -156,37 +157,48 @@ use Verot\Upload\Upload;
         }
         public function action(){
           if($_POST){
+            // Validar CSRF Token
+            if(empty($_POST['csrf_token']) || !validate_csrf_token($_POST['csrf_token'])){
+                $response = array("status" => 'error', "msg" => 'Token de seguridad inválido.');
+                echo json_encode($response,JSON_UNESCAPED_UNICODE);
+                die();
+            }
+
             if(empty($_POST['names']) || empty($_POST['surnames']) || empty($_POST['document']) || empty($_POST['username'])){
-        			$response = array("status" => 'error', "msg" => 'Campos señalados son obligatorios.');
+        				$response = array("status" => 'error', "msg" => 'Campos señalados son obligatorios.');
         		}else{
               $id = decrypt($_POST['iduser']);
               $id = intval($id);
-              $names = strtoupper(strClean($_POST['names']));
-              $surnames = strtoupper(strClean($_POST['surnames']));
-              $types = intval(strClean($_POST['listTypes']));
-              $document = strClean($_POST['document']);
-              $mobile = strClean($_POST['mobile']);
-              $email = strClean($_POST['email']);
+              $names = strtoupper(sanitize_string($_POST['names']));
+              $surnames = strtoupper(sanitize_string($_POST['surnames']));
+              $types = intval($_POST['listTypes']);
+              $document = sanitize_string($_POST['document']);
+              $mobile = sanitize_string($_POST['mobile']);
+              $email = sanitize_email($_POST['email']);
               $profile = decrypt($_POST['listProfiles']);
               $profile = intval($profile);
-              $username = strtolower(strClean($_POST['username']));
-              $state = intval(strClean($_POST['listStatus']));
+              $username = strtolower(sanitize_string($_POST['username']));
+              $state = intval($_POST['listStatus']);
               $image = "user_default.png";
               $datetime = date("Y-m-d H:i:s");
+              
               if($id == 0){
     				    $option = 1;
-      					$password =  empty($_POST['password']) ? encrypt(generate_password()) : encrypt($_POST['password']);
+                    // Usar bcrypt para nueva contraseña
+                    $password = empty($_POST['password']) ? hash_password(generate_password()) : hash_password($_POST['password']);
       					if($_SESSION['permits_module']['r']){
       						$request = $this->model->create($names,$surnames,$types,$document,$mobile,$email,$profile,$username,$password,$image,$datetime,$state);
       					}
       				}else{
                 $option = 2;
-                $password =  empty($_POST['password']) ? "" : encrypt($_POST['password']);
+                // Usar bcrypt si se proporciona nueva contraseña
+                $password = empty($_POST['password']) ? "" : hash_password($_POST['password']);
                 if($_SESSION['permits_module']['a']){
                   $request = $this->model->modify($id,$names,$surnames,$types,$document,$mobile,$email,$profile,$username,$password,$state);
                 }
       				}
               if($request == "success"){
+                  log_security_event('USER_CREATED', "User ID: {$id} by User ID: {$_SESSION['idUser']}", 'INFO');
       					if($option == 1){
       						$response = array('status' => 'success', 'msg' => 'Se ha registrado exitosamente.');
       					}else{
@@ -195,7 +207,7 @@ use Verot\Upload\Upload;
       				}else if($request == 'exists'){
       					$response = array('status' => 'error', 'msg' => '¡Atención! El registro ya existe, ingrese otro.');
       				}else{
-      					$response = array("status" => 'error', "msg" => 'No se pudo realizar esta operaciòn, intentelo nuevamente.');
+      					$response = array("status" => 'error', "msg" => 'No se pudo realizar esta operación, intentelo nuevamente.');
       				}
             }
             echo json_encode($response,JSON_UNESCAPED_UNICODE);
@@ -274,22 +286,37 @@ use Verot\Upload\Upload;
         }
         public function modify_password(){
             if($_POST){
+                // Validar CSRF Token
+                if(empty($_POST['csrf_token']) || !validate_csrf_token($_POST['csrf_token'])){
+                    $response = array("status" => 'error', "msg" => 'Token de seguridad inválido.');
+                    echo json_encode($response,JSON_UNESCAPED_UNICODE);
+                    die();
+                }
+
                 if(empty($_POST['password']) || empty($_POST['repeat_password'])){
                     $response = array("status" => 'error', "msg" => 'Campos señalados son obligatorios.');
                 }else{
                     $id = intval($_SESSION['idUser']);
-                    $password = "";
-        			if(!empty($_POST['password'])){
-        				$password =  encrypt($_POST['password']);
-        			}
+                    $password = $_POST['password'];
+                    $repeat_password = $_POST['repeat_password'];
 
-                    $request = $this->model->modify_password($id,$password);
-
-                    if($request == "success"){
-                        user_session($_SESSION['idUser']);
-                        $response = array('status' => 'success', 'msg' => 'Contraseña actualizada correctamente.');
+                    // Validar fortaleza de contraseña
+                    if(strlen($password) < 8){
+                        $response = array("status" => 'error', "msg" => 'La contraseña debe tener al menos 8 caracteres.');
+                    }else if($password !== $repeat_password){
+                        $response = array("status" => 'error', "msg" => 'Las contraseñas no coinciden.');
                     }else{
-                        $response = array("status" => 'error', "msg" => 'No es posible actualizar los datos.');
+                        // Usar bcrypt para nueva contraseña
+                        $password_hash = hash_password($password);
+                        $request = $this->model->modify_password($id, $password_hash);
+
+                        if($request == "success"){
+                            user_session($_SESSION['idUser']);
+                            log_security_event('PASSWORD_CHANGED', "User ID: {$id}", 'INFO');
+                            $response = array('status' => 'success', 'msg' => 'Contraseña actualizada correctamente.');
+                        }else{
+                            $response = array("status" => 'error', "msg" => 'No es posible actualizar los datos.');
+                        }
                     }
                 }
                 echo json_encode($response,JSON_UNESCAPED_UNICODE);

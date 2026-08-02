@@ -84,9 +84,10 @@
     				</div>
     			</div>
     			<div class="login-content">
-    				<form name="transactions" id="transactions" autocomplete="off" class="margin-bottom-0">
-    					<div class="form-group m-b-20">
-    						<input type="text" class="form-control form-control-lg" placeholder="Usuario" id="username" name="username" value="<?php if(isset($_COOKIE["username"])){ echo $_COOKIE["username"];} ?>">
+				<form name="transactions" id="transactions" autocomplete="off" class="margin-bottom-0">
+					<input type="hidden" name="csrf_token" value="<?= $data['csrf_token'] ?>">
+					<div class="form-group m-b-20">
+						<input type="text" class="form-control form-control-lg" placeholder="Usuario" id="username" name="username" value="<?php if(isset($_COOKIE["username"])){ echo $_COOKIE["username"];} ?>">
     					</div>
     					<div class="form-group mb-0">
     						<input type="password" class="form-control form-control-lg" placeholder="Contraseña" id="password" name="password" autocomplete="current-password">

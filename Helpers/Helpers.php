@@ -7,6 +7,8 @@
     require 'Libraries/dompdf/vendor/autoload.php';
     use Dompdf\Dompdf;
     require_once ("Countries.php");
+    require_once ("Security.php");
+    require_once ("ApidianHelper.php");
     function base_url(){
       return BASE_URL;
     }
@@ -55,6 +57,9 @@
         $output = openssl_decrypt(base64_decode($string), METHOD, $key, 0, $iv);
         return $output;
     }
+    // Alias para compatibilidad - encriptación de datos (NO para contraseñas)
+    function encrypt_data($string){ return encrypt($string); }
+    function decrypt_data($string){ return decrypt($string); }
     function format_money($amount){
         $amount = number_format($amount,2,SPD,SPM);
         return $amount;

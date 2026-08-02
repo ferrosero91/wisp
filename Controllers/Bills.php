@@ -40,7 +40,9 @@
             $this->views->getView($this,"pendings",$data);
         }
         public function list_records(){
-            if($_SESSION['permits_module']['v']){
+            if(empty($_SESSION['permits_module']['v'])){
+                send_json([]);
+            }
                 if(empty($_GET['start']) && empty($_GET['end'])){
                   $start = date("Y-m-01");
                   $end = date("Y-m-t");
@@ -117,19 +119,37 @@
                       $state = 'ANULADO';
                       $data[$i]['count_state'] = "ANULADO";
                     }
+                    
+                    // Verificar estado de facturación electrónica
+                    $ei_sent = $this->model->check_electronic_invoice($data[$i]['id']);
+                    $has_credit_note = false;
+                    $has_debit_note = false;
+                    $ei_type = '';
+                    
+                    if(!empty($ei_sent)){
+                        $ei_type = $ei_sent['type_document'] ?? '';
+                        // Verificar si tiene nota crédito asociada
+                        $credit_note = $this->model->check_credit_note($data[$i]['id']);
+                        if(!empty($credit_note)){
+                            $has_credit_note = true;
+                            $data[$i]['count_state'] = "ANULADA ELECT.";
+                            $state = 'ANULADA_ELECT';
+                        }
+                    }
+                    
                     if($_SESSION['permits_module']['v']){
                       $view = '<a href="javascript:;" class="black" data-toggle="tooltip" data-original-title="Ver detalle" onclick="view_bill(\''.encrypt($data[$i]['id']).'\')"><i class="fa fa-eye"></i></a>';
                       $view_2 = '<a href="javascript:;" class="dropdown-item" onclick="view_bill(\''.encrypt($data[$i]['id']).'\')"><i class="fa fa-eye mr-1"></i>Ver detalle</a>';
                       $voucher = '<a href="javascript:;" class="black" data-toggle="tooltip" data-original-title="Opciones" onclick="print_options(\''.encrypt($data[$i]['id']).'\')"><i class="far fa-sun"></i></a>';
                       $voucher_2 = '<a href="javascript:;" class="dropdown-item" onclick="print_options(\''.encrypt($data[$i]['id']).'\')"><i class="far fa-sun mr-1"></i>Opciones</a>';
-                      if($data[$i]['state'] != 4){
+                      if($data[$i]['state'] != 4 && !$has_credit_note){
                         $email = '<a href="javascript:;" class="blue" data-toggle="tooltip" data-original-title="Enviar por correo" onclick="send_email(\''.encrypt($data[$i]['id']).'\',\''.encrypt($data[$i]['clientid']).'\',\''.$state.'\')"><i class="fa fa-share-square"></i></a>';
                         $email_2 = '<a href="javascript:;" class="dropdown-item" onclick="send_email(\''.encrypt($data[$i]['id']).'\',\''.encrypt($data[$i]['clientid']).'\',\''.$state.'\')"><i class="fa fa-share-square mr-1"></i>Enviar por correo</a>';
                       }else{
                         $email = '';
                         $email_2 = '';
                       }
-                      if($data[$i]['state'] == 2 || $data[$i]['state'] == 3){
+                      if(($data[$i]['state'] == 2 || $data[$i]['state'] == 3) && !$has_credit_note){
                         $whatsapp = '<a href="javascript:;" class="green-light" data-toggle="tooltip" data-original-title="Notificar por WhatsApp" onclick="send_whatsapp(\''.encrypt($data[$i]['id']).'\')"><i class="fab fa-whatsapp" style="color: #25D366;"></i></a>';
                         $whatsapp_2 = '<a href="javascript:;" class="dropdown-item" onclick="send_whatsapp(\''.encrypt($data[$i]['id']).'\')"><i class="fab fa-whatsapp mr-1" style="color: #25D366;"></i>Notificar por WhatsApp</a>';
                       }else{
@@ -146,8 +166,9 @@
                       $whatsapp = '';
                       $whatsapp_2 = '';
                     }
+                    // Deshabilitar edición y pagos si tiene nota crédito
                     if($_SESSION['permits_module']['a']){
-                      if($data[$i]['type'] == 1){
+                      if($data[$i]['type'] == 1 || $has_credit_note){
                         $edit = '';
                         $edit_2 = '';
                       }else{
@@ -159,7 +180,7 @@
                       $edit_2 = '';
                     }
                     if($_SESSION['permits_module']['r']){
-                      if($data[$i]['state'] == 2 || $data[$i]['state'] == 3){
+                      if(($data[$i]['state'] == 2 || $data[$i]['state'] == 3) && !$has_credit_note){
                         $payment = '<a href="javascript:;" class="green-light" data-toggle="tooltip" data-original-title="Agregar pago" onclick="make_payment(\''.encrypt($data[$i]['id']).'\')"><i class="fa fa-dollar-sign"></i></a>';
                         $payment_2 = '<a href="javascript:;" class="dropdown-item" onclick="make_payment(\''.encrypt($data[$i]['id']).'\')"><i class="fa fa-dollar-sign mr-1"></i>Agregar pago</a>';
                       }else{
@@ -171,7 +192,7 @@
                       $payment_2 = '';
                     }
                     if($_SESSION['permits_module']['e']){
-                      if($data[$i]['state'] == 2 || $data[$i]['state'] == 3){
+                      if(($data[$i]['state'] == 2 || $data[$i]['state'] == 3) && !$has_credit_note){
                         if($data[$i]['amount_paid'] == 0){
                           $cancel = '<a href="javascript:;" class="red" data-toggle="tooltip" data-original-title="Anular" onclick="cancel(\''.encrypt($data[$i]['id']).'\',\''.$invoice.'\')"><i class="fa fa-ban"></i></a>';
                           $cancel_2 = '<a href="javascript:;" class="dropdown-item" onclick="cancel(\''.encrypt($data[$i]['id']).'\',\''.$invoice.'\')"><i class="fa fa-ban mr-1"></i>Anular</a>';
@@ -187,19 +208,46 @@
                       $cancel = '';
                       $cancel_2 = '';
                     }
-                    $options = '<div class="hidden-sm hidden-xs action-buttons">'.$view.$edit.$payment.$voucher.$cancel.$email.$whatsapp.'</div>';
+                    // Botón de facturación electrónica
+                    $dian_button = '';
+                    $dian_button_2 = '';
+                    if(($_SESSION['businessData']['apidian_configured'] ?? 0) == 1 && $data[$i]['state'] != 4){
+                        // Verificar si ya fue enviada a DIAN
+                        if(!empty($ei_sent) && $ei_sent['electronic_state'] == 1){
+                            // Ya fue enviada y autorizada
+                            if($has_credit_note){
+                                // Factura anulada por nota crédito - ver factura y nota crédito
+                                $dian_button = '<a href="javascript:;" class="text-success" data-toggle="tooltip" data-original-title="Ver Factura Electrónica" onclick="view_electronic_invoice(\''.encrypt($data[$i]['id']).'\')"><i class="fas fa-check-circle"></i></a>';
+                                $dian_button .= '<a href="javascript:;" class="text-info ml-1" data-toggle="tooltip" data-original-title="Ver Nota Crédito" onclick="view_credit_note(\''.encrypt($data[$i]['id']).'\')"><i class="fas fa-file-alt"></i></a>';
+                                $dian_button_2 = '<a href="javascript:;" class="dropdown-item text-success" onclick="view_electronic_invoice(\''.encrypt($data[$i]['id']).'\')"><i class="fas fa-check-circle mr-1"></i>Ver Factura Electrónica</a>';
+                                $dian_button_2 .= '<a href="javascript:;" class="dropdown-item text-info" onclick="view_credit_note(\''.encrypt($data[$i]['id']).'\')"><i class="fas fa-file-alt mr-1"></i>Ver Nota Crédito</a>';
+                            }else{
+                                // Factura activa - mostrar opciones
+                                $dian_button = '<a href="javascript:;" class="text-success" data-toggle="tooltip" data-original-title="Autorizada DIAN" onclick="view_electronic_invoice(\''.encrypt($data[$i]['id']).'\')"><i class="fas fa-check-circle"></i></a>';
+                                $dian_button .= '<a href="javascript:;" class="text-warning ml-1" data-toggle="tooltip" data-original-title="Nota Crédito" onclick="show_credit_note_modal(\''.encrypt($data[$i]['id']).'\')"><i class="fas fa-file-alt"></i></a>';
+                                $dian_button .= '<a href="javascript:;" class="text-danger ml-1" data-toggle="tooltip" data-original-title="Nota Débito" onclick="show_debit_note_modal(\''.encrypt($data[$i]['id']).'\')"><i class="fas fa-file-invoice-dollar"></i></a>';
+                                $dian_button_2 = '<a href="javascript:;" class="dropdown-item text-success" onclick="view_electronic_invoice(\''.encrypt($data[$i]['id']).'\')"><i class="fas fa-check-circle mr-1"></i>Ver Factura Electrónica</a>';
+                                $dian_button_2 .= '<a href="javascript:;" class="dropdown-item" onclick="show_credit_note_modal(\''.encrypt($data[$i]['id']).'\')"><i class="fas fa-file-alt mr-1"></i>Emitir Nota Crédito</a>';
+                                $dian_button_2 .= '<a href="javascript:;" class="dropdown-item" onclick="show_debit_note_modal(\''.encrypt($data[$i]['id']).'\')"><i class="fas fa-file-invoice-dollar mr-1"></i>Emitir Nota Débito</a>';
+                            }
+                        }else{
+                            // No enviada o rechazada - permitir enviar
+                            $dian_button = '<a href="javascript:;" class="text-info" data-toggle="tooltip" data-original-title="Enviar a DIAN" onclick="send_to_dian(\''.encrypt($data[$i]['id']).'\')"><i class="fas fa-file-invoice"></i></a>';
+                            $dian_button_2 = '<a href="javascript:;" class="dropdown-item" onclick="send_to_dian(\''.encrypt($data[$i]['id']).'\')"><i class="fas fa-file-invoice mr-1"></i>Enviar a DIAN</a>';
+                        }
+                    }
+                    $options = '<div class="hidden-sm hidden-xs action-buttons">'.$view.$edit.$payment.$voucher.$cancel.$email.$whatsapp.$dian_button.'</div>';
                     $options .='<div class="hidden-md hidden-lg"><div class="dropdown">
                     <button class="btn btn-white btn-sm" data-toggle="dropdown" aria-expanded="false">
                       <i class="fas fa-ellipsis-v"></i>
                     </button>
                     <div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 29px, 0px);">
-                      '.$view_2.$edit_2.$payment_2.$voucher_2.$cancel_2.$email_2.$whatsapp_2.'
+                      '.$view_2.$edit_2.$payment_2.$voucher_2.$cancel_2.$email_2.$whatsapp_2.$dian_button_2.'
                     </div>
                     </div></div>';
                     $data[$i]['options'] = $options;
                 }
-                echo json_encode($data,JSON_UNESCAPED_UNICODE);
-            }
+                send_json($data);
             die();
         }
         public function list_pendings(){

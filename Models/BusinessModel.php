@@ -13,8 +13,8 @@
 			$answer = $this->select_all($sql);
 			return $answer;
 		}
-    public function show_business(){
-      $sql = "SELECT  b.id,b.documentid,b.ruc,b.business_name,b.tradename,b.slogan,b.mobile,b.mobile_refrence,b.email,b.password,b.server_host,b.port,b.address,b.department,b.province,b.district,b.ubigeo,b.footer_text,b.currencyid,b.print_format,b.logo_login,b.logotyope,b.logo_email,b.favicon,b.country_code,b.google_apikey,b.reniec_apikey,b.background,c.symbol,c.money,c.money_plural FROM business b JOIN currency c ON b.currencyid = c.id";
+		public function show_business(){
+      $sql = "SELECT  b.id,b.documentid,b.ruc,b.business_name,b.tradename,b.slogan,b.mobile,b.mobile_refrence,b.email,b.password,b.server_host,b.port,b.address,b.department,b.province,b.district,b.ubigeo,b.footer_text,b.currencyid,b.print_format,b.logo_login,b.logotyope,b.logo_email,b.favicon,b.country_code,b.google_apikey,b.reniec_apikey,b.background,b.apidian_url,b.apidian_token,b.apidian_nit,b.apidian_dv,b.apidian_environment,b.apidian_prefix,b.apidian_resolution,b.apidian_resolution_from,b.apidian_resolution_to,b.apidian_next_number,b.tax_rate,b.tax_name,b.apidian_configured,b.apidian_type_doc,b.apidian_type_org,b.apidian_type_regime,b.apidian_type_liability,b.apidian_merchant,b.apidian_business_name,b.apidian_municipality_id,b.apidian_address,b.apidian_phone,b.apidian_email,b.apidian_certificate_configured,b.apidian_certificate_days_left,b.apidian_software_configured,c.symbol,c.money,c.money_plural FROM business b JOIN currency c ON b.currencyid = c.id";
       $request = $this->select($sql);
       $_SESSION['businessData'] = $request;
       return $request;
@@ -156,6 +156,100 @@
 				$answer = 'error';
 			}
 			return $answer;
+		}
+		public function update_electronic_invoice(int $id, string $apidian_url, string $apidian_token, string $apidian_nit, string $apidian_dv, string $apidian_environment, string $apidian_prefix, string $apidian_resolution, int $apidian_resolution_from, int $apidian_resolution_to, int $apidian_next_number, float $tax_rate, string $tax_name){
+			$this->intId = $id;
+			$answer = "";
+			$sql = "UPDATE business SET apidian_url=?, apidian_token=?, apidian_nit=?, apidian_dv=?, apidian_environment=?, apidian_prefix=?, apidian_resolution=?, apidian_resolution_from=?, apidian_resolution_to=?, apidian_next_number=?, tax_rate=?, tax_name=? WHERE id = $this->intId";
+			$data = array($apidian_url, $apidian_token, $apidian_nit, $apidian_dv, $apidian_environment, $apidian_prefix, $apidian_resolution, $apidian_resolution_from, $apidian_resolution_to, $apidian_next_number, $tax_rate, $tax_name);
+			$request = $this->update($sql,$data);
+			if($request){
+				$answer = 'success';
+			}else{
+				$answer = 'error';
+			}
+			return $answer;
+		}
+		public function update_apidian_token(int $id, string $token){
+			$this->intId = $id;
+			$answer = "";
+			$sql = "UPDATE business SET apidian_token = ? WHERE id = $this->intId";
+			$data = array($token);
+			$request = $this->update($sql,$data);
+			if($request){
+				$answer = 'success';
+			}else{
+				$answer = 'error';
+			}
+			return $answer;
+		}
+		public function update_apidian_connection(int $id, string $apidian_url, string $apidian_token, string $apidian_environment){
+			$this->intId = $id;
+			$answer = "";
+			$sql = "UPDATE business SET apidian_url=?, apidian_token=?, apidian_environment=? WHERE id = $this->intId";
+			$data = array($apidian_url, $apidian_token, $apidian_environment);
+			$request = $this->update($sql,$data);
+			if($request){
+				$answer = 'success';
+			}else{
+				$answer = 'error';
+			}
+			return $answer;
+		}
+		public function update_apidian_nit(int $id, string $nit, string $dv){
+			$this->intId = $id;
+			$answer = "";
+			$sql = "UPDATE business SET apidian_nit=?, apidian_dv=? WHERE id = $this->intId";
+			$data = array($nit, $dv);
+			$request = $this->update($sql,$data);
+			if($request){
+				$answer = 'success';
+			}else{
+				$answer = 'error';
+			}
+			return $answer;
+		}
+		public function update_taxes(int $id, float $tax_rate, string $tax_name){
+			$this->intId = $id;
+			$answer = "";
+			$sql = "UPDATE business SET tax_rate=?, tax_name=? WHERE id = $this->intId";
+			$data = array($tax_rate, $tax_name);
+			$request = $this->update($sql,$data);
+			if($request){
+				$answer = 'success';
+			}else{
+				$answer = 'error';
+			}
+			return $answer;
+		}
+		/* DATOS DE REFERENCIA DIAN */
+		public function get_dian_type_documents(){
+			$sql = "SELECT * FROM dian_type_documents ORDER BY id";
+			return $this->select_all($sql);
+		}
+		public function get_dian_type_organizations(){
+			$sql = "SELECT * FROM dian_type_organizations ORDER BY id";
+			return $this->select_all($sql);
+		}
+		public function get_dian_type_regimes(){
+			$sql = "SELECT * FROM dian_type_regimes ORDER BY id";
+			return $this->select_all($sql);
+		}
+		public function get_dian_type_liabilities(){
+			$sql = "SELECT * FROM dian_type_liabilities ORDER BY id";
+			return $this->select_all($sql);
+		}
+		public function get_dian_municipalities(){
+			$sql = "SELECT * FROM dian_municipalities ORDER BY name";
+			return $this->select_all($sql);
+		}
+		public function get_dian_payment_forms(){
+			$sql = "SELECT * FROM dian_payment_forms ORDER BY id";
+			return $this->select_all($sql);
+		}
+		public function get_dian_payment_methods(){
+			$sql = "SELECT * FROM dian_payment_methods ORDER BY id";
+			return $this->select_all($sql);
 		}
 		public function update_email(int $id,string $email,string $password,string $host,string $port,string $logo_email){
 			$this->intId = $id;
