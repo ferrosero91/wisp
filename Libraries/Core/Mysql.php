@@ -56,4 +56,44 @@
             $result->execute($this->values);
             return $result;
         }
+        
+        /* ============================================================
+         * TRANSACCIONES PDO
+         * ============================================================ */
+        
+        /**
+         * Inicia una transacción
+         */
+        public function beginTransaction(): bool {
+            return $this->conexion->beginTransaction();
+        }
+        
+        /**
+         * Confirma la transacción
+         */
+        public function commit(): bool {
+            return $this->conexion->commit();
+        }
+        
+        /**
+         * Revierte la transacción
+         */
+        public function rollback(): bool {
+            return $this->conexion->rollBack();
+        }
+        
+        /**
+         * Verifica si hay una transacción activa
+         */
+        public function inTransaction(): bool {
+            return $this->conexion->inTransaction();
+        }
+        
+        /**
+         * Obtiene la conexión PDO directamente
+         * Útil para operaciones avanzadas
+         */
+        public function getConnection(): PDO {
+            return $this->conexion;
+        }
     }

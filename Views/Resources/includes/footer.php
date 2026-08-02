@@ -108,12 +108,13 @@
         const currency_symbol = "<?= empty($_SESSION['businessData']['symbol']) ? "" : $_SESSION['businessData']['symbol'] ?>";
         const user_profile = "<?= empty($_SESSION['userData']['profileid']) ? 0 : $_SESSION['userData']['profileid'] ?>";
         const key_google = "<?= empty($_SESSION['businessData']['google_apikey']) ? "" : $_SESSION['businessData']['google_apikey'] ?>";
+        const csrf_token = "<?= get_csrf_token(); ?>";
     </script>
     <!-- ================== INICIO RUTA  ============== -->
     <!-- ================== INICIO ARCHIVOS JS ======== -->
     <script src="<?= base_style() ?>/js/app.min.js"></script>
     <script src="<?= base_style() ?>/js/moment.min.js"></script>
-    <script src="<?= base_style() ?>/js/functions.js?v=2026080215"></script>
+    <script src="<?= base_style() ?>/js/functions.js?v=2026080216"></script>
     <script src="<?= base_style() ?>/js/utils.min.js"></script>
     <script src="<?= base_style() ?>/js/initial.min.js"></script>
     <script src="<?= base_style() ?>/js/theme/default.min.js"></script>
@@ -137,7 +138,7 @@
     <!-- ================== FIN API GOOGLE MAPS JS ================== -->
     <?php if(isset($data['page_functions_js'])){ ?>
     <!-- ================== INICIO FUNCION JS ============ -->
-    <script src="<?= base_style() ?>/js/functions/<?= $data['page_functions_js']; ?>?v=2026080215"></script>
+    <script src="<?= base_style() ?>/js/functions/<?= $data['page_functions_js']; ?>?v=2026080216"></script>
     <!-- ================== FIN FUNCION JS =============== -->
      <?php } ?>
     </body>

@@ -76,6 +76,51 @@ function csrf_meta(): string {
     return '<meta name="csrf-token" content="' . htmlspecialchars($token) . '">';
 }
 
+/**
+ * Valida CSRF en requests POST
+ * Retorna true si es válido, false si no
+ * Para requests AJAX, valida desde header o POST data
+ * Para requests normales, valida desde POST data
+ */
+function verify_csrf(): bool {
+    // Solo aplicar a POST requests
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        return true;
+    }
+    
+    // Obtener token del header AJAX o del POST data
+    $token = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+    
+    if (empty($token)) {
+        return false;
+    }
+    
+    return validate_csrf_token($token);
+}
+
+/**
+ * Middleware CSRF - detiene ejecución si el token no es válido
+ * Usar al inicio de endpoints POST que requieren protección
+ */
+function csrf_protect(): void {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && !verify_csrf()) {
+        header('Content-Type: application/json; charset=UTF-8');
+        http_response_code(403);
+        echo json_encode([
+            'status' => 'error', 
+            'msg' => 'Token de seguridad inválido. Recargue la página.'
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+}
+
+/**
+ * Obtiene el token CSRF actual (para usar en JavaScript)
+ */
+function get_csrf_token(): string {
+    return generate_csrf_token();
+}
+
 /* ============================================================
  * RATE LIMITING
  * ============================================================ */

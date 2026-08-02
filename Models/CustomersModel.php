@@ -27,10 +27,11 @@
     public function list_records(int $state){
       if($state == 0){
         $sql = "SELECT  c.id,c.internal_code,c.clientid,c.payday,c.create_invoice,c.days_grace,c.discount,c.discount_price,c.months_discount,c.contract_date,c.suspension_date,c.finish_date,c.state,CONCAT_WS(' ', cl.names, cl.surnames) AS client,cl.document,d.document AS name_doc,cl.latitud,cl.longitud,cl.email,cl.mobile,cl.mobile_optional,cl.address,cl.reference FROM contracts c JOIN clients cl ON c.clientid = cl.id JOIN document_type d ON cl.documentid = d.id WHERE c.state != 0 ORDER BY c.id DESC";
+        $answer = $this->select_all($sql);
       }else{
-        $sql = "SELECT c.id,c.internal_code,c.clientid,c.payday,c.create_invoice,c.days_grace,c.discount,c.discount_price,c.months_discount,c.contract_date,c.suspension_date,c.finish_date,c.state,CONCAT_WS(' ', cl.names, cl.surnames) AS client,cl.document,d.document AS name_doc,cl.latitud,cl.longitud,cl.email,cl.mobile,cl.mobile_optional,cl.address,cl.reference FROM contracts c JOIN clients cl ON c.clientid = cl.id JOIN document_type d ON cl.documentid = d.id WHERE c.state = $state ORDER BY c.id DESC";
+        $sql = "SELECT c.id,c.internal_code,c.clientid,c.payday,c.create_invoice,c.days_grace,c.discount,c.discount_price,c.months_discount,c.contract_date,c.suspension_date,c.finish_date,c.state,CONCAT_WS(' ', cl.names, cl.surnames) AS client,cl.document,d.document AS name_doc,cl.latitud,cl.longitud,cl.email,cl.mobile,cl.mobile_optional,cl.address,cl.reference FROM contracts c JOIN clients cl ON c.clientid = cl.id JOIN document_type d ON cl.documentid = d.id WHERE c.state = ? ORDER BY c.id DESC";
+        $answer = $this->select_all($sql, array($state));
       }
-      $answer = $this->select_all($sql);
       return $answer;
     }
     public function export(){
@@ -239,14 +240,14 @@
     }
     public function select_client(int $client){
       $this->intClient = $client;
-      $sql = "SELECT c.id,c.names,c.surnames,c.documentid,c.document,c.mobile,c.mobile_optional,c.email,c.address,c.reference,c.latitud,c.longitud, c.state,d.document AS name_doc FROM clients c JOIN document_type d ON c.documentid = d.id WHERE c.id = $this->intClient";
-      $answer = $this->select($sql);
+      $sql = "SELECT c.id,c.names,c.surnames,c.documentid,c.document,c.mobile,c.mobile_optional,c.email,c.address,c.reference,c.latitud,c.longitud, c.state,d.document AS name_doc FROM clients c JOIN document_type d ON c.documentid = d.id WHERE c.id = ?";
+      $answer = $this->select($sql, array($this->intClient));
       return $answer;
     }
     public function select_contract(int $client){
     	$this->intClient = $client;
-    	$sql = "SELECT * FROM contracts WHERE clientid = $this->intClient";
-    	$answer = $this->select($sql);
+    	$sql = "SELECT * FROM contracts WHERE clientid = ?";
+    	$answer = $this->select($sql, array($this->intClient));
     	return $answer;
     }
     public function existing_client(string $names,string $surnames){
@@ -276,8 +277,8 @@
     }
     public function select_record(int $id){
       $this->intId = $id;
-      $sql = "SELECT *FROM contracts WHERE id = $this->intId";
-      $asnwer = $this->select($sql);
+      $sql = "SELECT *FROM contracts WHERE id = ?";
+      $asnwer = $this->select($sql, array($this->intId));
       return $asnwer;
     }
     public function search_document(string $document){
@@ -1489,5 +1490,86 @@
       $data_check = array($this->strImagen);
       $request_delete = $this->delete($query,$data_check);
       return $request_delete;
+    }
+    
+    /* ============================================================
+     * OPERACIONES CON TRANSACCIONES
+     * ============================================================ */
+    
+    /**
+     * Registra cliente + contrato + detalle + instalación en una transacción
+     * Si cualquier paso falla, se revierten todos los cambios
+     */
+    public function register_contract_with_transaction(
+        array $client_data, 
+        array $contract_data, 
+        array $detail_data, 
+        array $facility_data
+    ): array {
+        try {
+            $this->beginTransaction();
+            
+            // 1. Crear cliente
+            $query_client = "INSERT INTO clients(names,surnames,documentid,document,mobile,mobile_optional,email,address,reference) VALUES(?,?,?,?,?,?,?,?,?)";
+            $data_client = array(
+                $client_data['names'], $client_data['surnames'], $client_data['type_document'],
+                $client_data['document'], $client_data['mobile'], $client_data['mobile_optional'],
+                $client_data['email'], $client_data['address'], $client_data['reference']
+            );
+            $idclient = $this->insert($query_client, $data_client);
+            if (!$idclient) {
+                $this->rollback();
+                return ['status' => 'error', 'msg' => 'Error al crear el cliente.'];
+            }
+            
+            // 2. Crear contrato
+            $query_contract = "INSERT INTO contracts(userid,clientid,internal_code,payday,create_invoice,days_grace,discount,discount_price,months_discount,remaining_discount,contract_date,state) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
+            $data_contract = array(
+                $contract_data['user'], $idclient, $contract_data['code'],
+                $contract_data['payday'], $contract_data['invoice'], $contract_data['daygrace'],
+                $contract_data['discount'], $contract_data['pricedisc'], $contract_data['monthdisc'],
+                $contract_data['monthdisc'], $contract_data['datetime'], $contract_data['state']
+            );
+            $idcontract = $this->insert($query_contract, $data_contract);
+            if (!$idcontract) {
+                $this->rollback();
+                return ['status' => 'error', 'msg' => 'Error al crear el contrato.'];
+            }
+            
+            // 3. Crear detalle del contrato
+            $query_detail = "INSERT INTO detail_contracts(contractid,serviceid,price,registration_date) VALUES(?,?,?,?)";
+            $data_detail = array($idcontract, $detail_data['service'], $detail_data['price'], $detail_data['datetime']);
+            $iddetail = $this->insert($query_detail, $data_detail);
+            if (!$iddetail) {
+                $this->rollback();
+                return ['status' => 'error', 'msg' => 'Error al crear el detalle del contrato.'];
+            }
+            
+            // 4. Crear instalación
+            $query_facility = "INSERT INTO facility(clientid,userid,technical,attention_date,cost,detail,registration_date) VALUES(?,?,?,?,?,?,?)";
+            $data_facility = array(
+                $idclient, $facility_data['user'], $facility_data['technical'],
+                $facility_data['insDate'], $facility_data['price'], $facility_data['detail'],
+                $facility_data['datetime']
+            );
+            $idfacility = $this->insert($query_facility, $data_facility);
+            if (!$idfacility) {
+                $this->rollback();
+                return ['status' => 'error', 'msg' => 'Error al crear la instalación.'];
+            }
+            
+            // Todo exitoso - confirmar transacción
+            $this->commit();
+            
+            return [
+                'status' => 'success', 
+                'msg' => 'Se registró el cliente exitosamente.',
+                'id' => encrypt($idcontract)
+            ];
+            
+        } catch (\Exception $e) {
+            $this->rollback();
+            return ['status' => 'error', 'msg' => 'Error en el proceso: ' . $e->getMessage()];
+        }
     }
   }

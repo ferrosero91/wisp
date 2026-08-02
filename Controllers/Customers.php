@@ -332,26 +332,26 @@
             }
             $existing_client = $this->model->existing_client($names,$surnames);
             if(empty($existing_client)){
-              $request_client = $this->model->create_client($names,$surnames,$type_document,$document,$mobile,$mobileOp,$email,$address,$reference);
-              if($request_client == 'success'){
-                $idclient = $this->model->returnClient();
-                $request = $this->model->create($user,$idclient,$code,$payday,$invoice,$daygrace,$discount,$pricedisc,$monthdisc,$datetime,$state);
-                if($request == "success"){
-                  $idcontract = $this->model->returnContract();
-                  $priceService = $this->model->returnPriceService($service);
-                  $request = $this->model->create_detail($idcontract,$service,$priceService,$datetime);
-                  $request_facility = $this->model->create_facility($idclient,$user,$technical,$insDate,$price,$detail,$datetime);
-                  if($request_facility == "success"){
-                    $response = array('status' => 'success', 'msg' => 'Se registro el cliente exitosamente.', 'id' => encrypt($idcontract));
-                  }else{
-                    $response = array('status' => 'error', 'msg' => 'No se pudo realizar esta operaciòn, intentelo nuevamente.');
-                  }
-                }else{
-                  $response = array('status' => 'error', 'msg' => 'No se pudo realizar esta operaciòn, intentelo nuevamente.');
-                }
-              }else{
-                $response = array('status' => 'error', 'msg' => 'No se pudo realizar esta operaciòn, intentelo nuevamente.');
-              }
+              // Usar transacción para operación atómica
+              $priceService = $this->model->returnPriceService($service);
+              $client_data = array(
+                'names' => $names, 'surnames' => $surnames, 'type_document' => $type_document,
+                'document' => $document, 'mobile' => $mobile, 'mobile_optional' => $mobileOp,
+                'email' => $email, 'address' => $address, 'reference' => $reference
+              );
+              $contract_data = array(
+                'user' => $user, 'code' => $code, 'payday' => $payday, 'invoice' => $invoice,
+                'daygrace' => $daygrace, 'discount' => $discount, 'pricedisc' => $pricedisc,
+                'monthdisc' => $monthdisc, 'datetime' => $datetime, 'state' => $state
+              );
+              $detail_data = array(
+                'service' => $service, 'price' => $priceService, 'datetime' => $datetime
+              );
+              $facility_data = array(
+                'user' => $user, 'technical' => $technical, 'insDate' => $insDate,
+                'price' => $price, 'detail' => $detail, 'datetime' => $datetime
+              );
+              $response = $this->model->register_contract_with_transaction($client_data, $contract_data, $detail_data, $facility_data);
             }else{
               $response = array('status' => 'exists', 'msg' => 'El cliente ya existe, ingrese otro.');
             }

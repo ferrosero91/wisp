@@ -488,21 +488,21 @@
         require_once("Libraries/Core/Mysql.php");
         $con = new Mysql();
         $request = array();
-        $sql_contract = "SELECT *FROM contracts WHERE id = $contract";
-        $request_contract = $con->select($sql_contract);
+        $sql_contract = "SELECT *FROM contracts WHERE id = ?";
+        $request_contract = $con->select($sql_contract, array($contract));
         if(!empty($request_contract)){
             $contract_date = date("Y-m-d", strtotime($request_contract['contract_date']));
             $contract_id = $request_contract['id'];
-            $client = $request_contract['clientid'];
-            $sql_client = "SELECT *FROM clients WHERE id = $client";
-            $request_client = $con->select($sql_client);
-            $sql_pending = "SELECT COUNT(id) AS pending FROM bills WHERE clientid = $client AND state != 4 AND type = 2 ";
-            $request_pending = $con->select($sql_pending);
+            $client = intval($request_contract['clientid']);
+            $sql_client = "SELECT *FROM clients WHERE id = ?";
+            $request_client = $con->select($sql_client, array($client));
+            $sql_pending = "SELECT COUNT(id) AS pending FROM bills WHERE clientid = ? AND state != 4 AND type = 2";
+            $request_pending = $con->select($sql_pending, array($client));
             $pending = $request_pending['pending'];
-            $sql_bill = "SELECT * FROM bills WHERE clientid = $client AND state != 4 AND type = 2 ORDER BY id DESC LIMIT 1";
-            $request_bill = $con->select($sql_bill);
-            $sql_debt = "SELECT COALESCE(SUM(remaining_amount),0) AS debt FROM bills WHERE clientid = $client AND state NOT IN(1,4)";
-            $request_debt = $con->select($sql_debt);
+            $sql_bill = "SELECT * FROM bills WHERE clientid = ? AND state != 4 AND type = 2 ORDER BY id DESC LIMIT 1";
+            $request_bill = $con->select($sql_bill, array($client));
+            $sql_debt = "SELECT COALESCE(SUM(remaining_amount),0) AS debt FROM bills WHERE clientid = ? AND state NOT IN(1,4)";
+            $request_debt = $con->select($sql_debt, array($client));
             $debt = $request_debt['debt'];
             $request = array('contract' => $request_contract, 'client' => $request_client, 'current_debt' => $debt, 'bill' => $request_bill, 'pending' => $pending);
         }
@@ -512,24 +512,24 @@
         require_once("Libraries/Core/Mysql.php");
         $con = new Mysql();
         $request = array();
-        $sql_product = "SELECT *FROM products WHERE id = $product";
-        $request_product = $con->select($sql_product);
+        $sql_product = "SELECT *FROM products WHERE id = ?";
+        $request_product = $con->select($sql_product, array($product));
         if(!empty($request_product)){
-            $sql_income = "SELECT COALESCE(SUM(quantity_income),0) AS input_amount,COALESCE(SUM(unit_price),0) AS total_input FROM income WHERE productid = $product";
-            $request_income = $con->select($sql_income);
-            $sql_departure = "SELECT COALESCE(SUM(quantity_departures),0) AS output_quantity,COALESCE(SUM(unit_price),0) AS total_output FROM departures WHERE productid = $product";
-            $request_departure = $con->select($sql_departure);
-            $sql_inventary = "SELECT COALESCE(MIN(quantity_income),0) AS initial_inventory FROM income WHERE productid = $product";
-            $request_inventary = $con->select($sql_inventary);
+            $sql_income = "SELECT COALESCE(SUM(quantity_income),0) AS input_amount,COALESCE(SUM(unit_price),0) AS total_input FROM income WHERE productid = ?";
+            $request_income = $con->select($sql_income, array($product));
+            $sql_departure = "SELECT COALESCE(SUM(quantity_departures),0) AS output_quantity,COALESCE(SUM(unit_price),0) AS total_output FROM departures WHERE productid = ?";
+            $request_departure = $con->select($sql_departure, array($product));
+            $sql_inventary = "SELECT COALESCE(MIN(quantity_income),0) AS initial_inventory FROM income WHERE productid = ?";
+            $request_inventary = $con->select($sql_inventary, array($product));
             $inventary = $request_inventary['initial_inventory'];
             $sql_detail = "SELECT date,type,price,quantity,description,total FROM
     				((SELECT e.income_date AS date ,'ENTRADA' AS type,e.description AS description,e.unit_price AS price,e.quantity_income AS quantity,e.total_cost AS total
-    				FROM income e WHERE e.productid = $product)
+    				FROM income e WHERE e.productid = ?)
     				UNION ALL
     				(SELECT s.departure_date AS date,'SALIDA' AS type,s.description AS description,s.unit_price AS price,s.quantity_departures AS quantity,s.total_cost AS total
-    				FROM departures s WHERE s.productid = $product))t2 ORDER BY date DESC;
+    				FROM departures s WHERE s.productid = ?))t2 ORDER BY date DESC;
             ";
-            $request_detail = $con->select_all($sql_detail);
+            $request_detail = $con->select_all($sql_detail, array($product, $product));
             $request = array('product' => $request_product, 'income' => $request_income, 'departure' => $request_departure, 'inventary' => $inventary, 'detail' => $request_detail);
         }
         return $request;

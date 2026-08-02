@@ -1,6 +1,28 @@
 $('body').tooltip({
     selector: '[data-toggle=tooltip]'
 });
+
+/* CSRF Token - Auto-inject en peticiones POST */
+(function() {
+    var originalOpen = XMLHttpRequest.prototype.open;
+    var originalSend = XMLHttpRequest.prototype.send;
+    
+    XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+        this._method = method;
+        return originalOpen.apply(this, arguments);
+    };
+    
+    XMLHttpRequest.prototype.send = function(data) {
+        if (this._method && this._method.toUpperCase() === 'POST' && typeof csrf_token !== 'undefined') {
+            this.setRequestHeader('X-CSRF-Token', csrf_token);
+            if (data instanceof FormData && !data.has('csrf_token')) {
+                data.append('csrf_token', csrf_token);
+            }
+        }
+        return originalSend.apply(this, arguments);
+    };
+})();
+
 var concurrence = 15,timechar,interval;
 var loading = document.querySelector("#loading");
 var loadingTitle = document.querySelector(".loading-title");
