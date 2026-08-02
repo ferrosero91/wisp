@@ -1510,7 +1510,7 @@ function send_to_dian(idbill){
                                         $.confirm({
                                             theme: 'modern',
                                             draggable: false,
-                                            closeIcon: true,
+                                            closeIcon: false,
                                             animationBounce: 2.5,
                                             type: 'success',
                                             icon: 'far fa-check-circle',
@@ -1525,14 +1525,14 @@ function send_to_dian(idbill){
                                             buttons: {
                                                 ok: {
                                                     text: '<i class="fas fa-check mr-1"></i>Aceptar',
-                                                    btnClass: 'btn-success'
+                                                    btnClass: 'btn-success',
+                                                    action: function(){
+                                                        location.reload();
+                                                    }
                                                 }
                                             }
                                         });
                                     }, 900);
-                                    if(typeof table_bills !== 'undefined'){
-                                        table_bills.ajax.reload();
-                                    }
                                 } else {
                                     hideLoading(false);
                                     setTimeout(function(){
@@ -1651,8 +1651,8 @@ function send_credit_note(idbill, reason, desc, notes){
                     hideLoading(true);
                     setTimeout(function(){
                         alert_msg("success", obj.msg + (obj.number ? '<br><strong>Número:</strong> ' + obj.number : '') + (obj.cude ? '<br><strong>CUDE:</strong> <code style="word-break:break-all;font-size:11px;">'+obj.cude+'</code>' : ''));
+                        setTimeout(function(){ location.reload(); }, 2000);
                     }, 900);
-                    if(typeof table_bills !== 'undefined') table_bills.ajax.reload();
                 } else {
                     hideLoading(false);
                     setTimeout(function(){
@@ -1746,8 +1746,8 @@ function send_debit_note(idbill, reason, desc, notes){
                     hideLoading(true);
                     setTimeout(function(){
                         alert_msg("success", obj.msg + (obj.number ? '<br><strong>Número:</strong> ' + obj.number : '') + (obj.cude ? '<br><strong>CUDE:</strong> <code style="word-break:break-all;font-size:11px;">'+obj.cude+'</code>' : ''));
+                        setTimeout(function(){ location.reload(); }, 2000);
                     }, 900);
-                    if(typeof table_bills !== 'undefined') table_bills.ajax.reload();
                 } else {
                     hideLoading(false);
                     setTimeout(function(){
