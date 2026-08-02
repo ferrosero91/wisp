@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function(){
         transactions.onsubmit = function(e){
             e.preventDefault();
             if($('#transactions').parsley().isValid()){
-                loading.style.display = "flex";
+                showLoading('Guardando información, espere por favor...');
                 var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
                 var ajaxUrl = base_url+'/categories/action';
                 var formData = new FormData(transactions);
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function(){
                             alert_msg("error",objData.msg);
                         }
                     }
-                    loading.style.display = "none";
+                    hideLoading();
                     return false;
                 }
             }
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function(){
                       alert_msg("warning","Selecionar una extensión permitida .xls o .xlsx.");
                       return false;
                     }
-                    loading.style.display = "flex";
+                    showLoading('Importando datos, espere por favor...');
                     var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
                     var ajaxUrl = base_url+'/categories/import';
                     var formData = new FormData(transactions_import);
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function(){
                                 alert_msg("error",objData.msg);
                             }
                         }
-                        loading.style.display = "none";
+                        hideLoading();
                         return false;
                     }
                 }

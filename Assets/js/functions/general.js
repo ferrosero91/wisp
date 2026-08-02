@@ -60,38 +60,82 @@ function editResolution(id){
 }
 function toggleResolution(id, state){
     var msg = state == 0 ? 'desactivar' : 'activar';
-    if(!confirm('¿Desea '+msg+' esta resolución?')) return;
-    var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-    var ajaxUrl = base_url+'/settings/toggle_resolution';
-    var formData = new FormData();
-    formData.append('id', id);
-    formData.append('state', state);
-    request.open("POST",ajaxUrl,true);
-    request.send(formData);
-    request.onreadystatechange = function(){
-        if(request.readyState == 4 && request.status == 200){
-            var objData = JSON.parse(request.responseText);
-            if(objData.status == 'success'){
-                alert_msg("success", objData.msg);
-                loadResolutions();
-            }else{
-                alert_msg("error", objData.msg);
+    var icon = state == 0 ? 'fas fa-pause-circle' : 'fas fa-play-circle';
+    var color = state == 0 ? 'orange' : 'green';
+    var btnClass = state == 0 ? 'btn-warning' : 'btn-success';
+    $.confirm({
+        theme: 'modern',
+        draggable: false,
+        closeIcon: true,
+        animationBounce: 2.5,
+        type: color,
+        icon: icon,
+        title: msg.toUpperCase() + ' RESOLUCIÓN',
+        content: '<div style="text-align:center;">' +
+            '<div style="font-size:48px;color:' + (state == 0 ? '#f59c1a' : '#1aa179') + ';margin-bottom:15px;"><i class="' + icon + '"></i></div>' +
+            '<p style="font-size:14px;color:#555;">¿Desea ' + msg + ' esta resolución?</p>' +
+            '</div>',
+        buttons: {
+            confirm: {
+                text: '<i class="fas fa-check mr-1"></i>Confirmar',
+                btnClass: btnClass,
+                action: function(){
+                    var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+                    var ajaxUrl = base_url+'/settings/toggle_resolution';
+                    var formData = new FormData();
+                    formData.append('id', id);
+                    formData.append('state', state);
+                    request.open("POST",ajaxUrl,true);
+                    request.send(formData);
+                    request.onreadystatechange = function(){
+                        if(request.readyState == 4 && request.status == 200){
+                            var objData = JSON.parse(request.responseText);
+                            if(objData.status == 'success'){
+                                alert_msg("success", objData.msg);
+                                loadResolutions();
+                            }else{
+                                alert_msg("error", objData.msg);
+                            }
+                        }
+                    }
+                }
+            },
+            cancel: {
+                text: '<i class="fas fa-times mr-1"></i>Cancelar',
+                btnClass: 'btn-default'
             }
         }
-    }
+    });
 }
 function deleteResolution(id){
-    if(!confirm('¿Está seguro de eliminar esta resolución? Esta acción no se puede deshacer.')) return;
-    var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-    var ajaxUrl = base_url+'/settings/delete_resolution';
-    var formData = new FormData();
-    formData.append('id', id);
-    request.open("POST",ajaxUrl,true);
-    request.send(formData);
-    request.onreadystatechange = function(){
-        if(request.readyState == 4 && request.status == 200){
-            var objData = JSON.parse(request.responseText);
-            if(objData.status == 'success'){
+    $.confirm({
+        theme: 'modern',
+        draggable: false,
+        closeIcon: true,
+        animationBounce: 2.5,
+        type: 'red',
+        icon: 'fas fa-trash-alt',
+        title: 'ELIMINAR RESOLUCIÓN',
+        content: '<div style="text-align:center;">' +
+            '<div style="font-size:48px;color:#ff5b57;margin-bottom:15px;"><i class="fas fa-trash-alt"></i></div>' +
+            '<p style="font-size:14px;color:#555;margin-bottom:10px;">¿Está seguro de eliminar esta resolución?</p>' +
+            '<p style="font-size:12px;color:#888;">Esta acción no se puede deshacer.</p>' +
+            '</div>',
+        buttons: {
+            delete: {
+                text: '<i class="fas fa-trash-alt mr-1"></i>Eliminar',
+                btnClass: 'btn-danger',
+                action: function(){
+                    var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+                    var ajaxUrl = base_url+'/settings/delete_resolution';
+                    var formData = new FormData();
+                    formData.append('id', id);
+                    request.open("POST",ajaxUrl,true);
+                    request.send(formData);
+                    request.onreadystatechange = function(){
+                        if(request.readyState == 4 && request.status == 200){
+                            var objData = JSON.parse(request.responseText);
+                            if(objData.status == 'success'){
                 alert_msg("success", objData.msg);
                 loadResolutions();
             }else{
@@ -191,41 +235,78 @@ function sendResolutionToApidian(){
     }
     // NC y ND no requieren campos adicionales
     
-    if(!confirm("¿Está seguro de enviar esta resolución a APIDIAN?")) return;
-    
-    loading.style.display = "flex";
-    var formData = new FormData(form);
-    var ajaxUrl = base_url+'/settings/send_resolution_to_apidian';
-    
-    var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-    request.open("POST", ajaxUrl, true);
-    
-    request.onload = function() {
-        loading.style.display = "none";
-        if (request.status === 200) {
-            try {
-                var objData = JSON.parse(request.responseText);
-                if (objData.status === "success") {
-                    alert_msg("success", objData.msg);
-                    cancelResolution();
-                    loadResolutions();
-                } else {
-                    alert_msg("error", objData.msg);
+    $.confirm({
+        theme: 'modern',
+        draggable: false,
+        closeIcon: true,
+        animationBounce: 2.5,
+        type: 'blue',
+        icon: 'fas fa-cloud-upload-alt',
+        title: 'ENVIAR RESOLUCIÓN A APIDIAN',
+        content: '<div style="text-align:center;">' +
+            '<div style="font-size:48px;color:#348fe2;margin-bottom:15px;"><i class="fas fa-cloud-upload-alt"></i></div>' +
+            '<p style="font-size:14px;color:#555;margin-bottom:10px;">¿Está seguro de enviar esta resolución a APIDIAN?</p>' +
+            '<p style="font-size:12px;color:#888;">Este proceso registrará la resolución en el sistema de facturación electrónica.</p>' +
+            '</div>',
+        buttons: {
+            send: {
+                text: '<i class="fas fa-paper-plane mr-1"></i>Enviar a APIDIAN',
+                btnClass: 'btn-blue',
+                action: function(){
+                    showInvoiceLoading('Enviando resolución a APIDIAN...');
+                    var formData = new FormData(form);
+                    var ajaxUrl = base_url+'/settings/send_resolution_to_apidian';
+                    
+                    var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+                    request.open("POST", ajaxUrl, true);
+                    
+                    request.onload = function() {
+                        if (request.status === 200) {
+                            try {
+                                var objData = JSON.parse(request.responseText);
+                                if (objData.status === "success") {
+                                    hideLoading(true);
+                                    setTimeout(function(){
+                                        alert_msg("success", objData.msg);
+                                        cancelResolution();
+                                        loadResolutions();
+                                    }, 900);
+                                } else {
+                                    hideLoading(false);
+                                    setTimeout(function(){
+                                        alert_msg("error", objData.msg);
+                                    }, 1300);
+                                }
+                            } catch (parseError) {
+                                hideLoading(false);
+                                setTimeout(function(){
+                                    alert_msg("error", "Error al procesar la respuesta");
+                                }, 1300);
+                            }
+                        } else {
+                            hideLoading(false);
+                            setTimeout(function(){
+                                alert_msg("error", "Error del servidor: " + request.status);
+                            }, 1300);
+                        }
+                    };
+                    
+                    request.onerror = function() {
+                        hideLoading(false);
+                        setTimeout(function(){
+                            alert_msg("error", "Error de conexión");
+                        }, 1300);
+                    };
+                    
+                    request.send(formData);
                 }
-            } catch (parseError) {
-                alert_msg("error", "Error al procesar la respuesta");
+            },
+            cancel: {
+                text: '<i class="fas fa-times mr-1"></i>Cancelar',
+                btnClass: 'btn-default'
             }
-        } else {
-            alert_msg("error", "Error del servidor: " + request.status);
         }
-    };
-    
-    request.onerror = function() {
-        loading.style.display = "none";
-        alert_msg("error", "Error de conexión");
-    };
-    
-    request.send(formData);
+    });
 }
 /* EVENTOS - Se ejecutan cuando el DOM esta listo */
 document.addEventListener('DOMContentLoaded',function(){
@@ -234,7 +315,7 @@ document.addEventListener('DOMContentLoaded',function(){
         transactions_general.onsubmit = function(e){
             e.preventDefault();
             if($('#transactions_general').parsley().isValid()){
-                loading.style.display = "flex";
+                showDatabaseLoading('Guardando configuración general...');
                 var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
                 var ajaxUrl = base_url+'/business/update_general';
                 var formData = new FormData(transactions_general);
@@ -244,13 +325,18 @@ document.addEventListener('DOMContentLoaded',function(){
                     if(request.readyState == 4 && request.status == 200){
                         var objData = JSON.parse(request.responseText);
                         if(objData.status == "success"){
-                            alert_msg("success", objData.msg);
-                            setTimeout(function(){ location.reload(); }, 1500);
+                            hideLoading(true);
+                            setTimeout(function(){
+                                alert_msg("success", objData.msg);
+                                location.reload();
+                            }, 900);
                         }else{
-                            alert_msg("error",objData.msg);
+                            hideLoading(false);
+                            setTimeout(function(){
+                                alert_msg("error",objData.msg);
+                            }, 1300);
                         }
                     }
-                    loading.style.display = "none";
                     return false;
                 }
             }
@@ -260,7 +346,7 @@ document.addEventListener('DOMContentLoaded',function(){
         var transactions_basic = document.querySelector("#transactions_basic");
         transactions_basic.onsubmit = function(e){
             e.preventDefault();
-            loading.style.display = "flex";
+            showDatabaseLoading('Guardando información básica...');
             var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             var ajaxUrl = base_url+'/business/update_basic';
             var formData = new FormData(transactions_basic);
@@ -270,13 +356,18 @@ document.addEventListener('DOMContentLoaded',function(){
                 if(request.readyState == 4 && request.status == 200){
                     var objData = JSON.parse(request.responseText);
                     if(objData.status == "success"){
-                        alert_msg("success", objData.msg);
-                        setTimeout(function(){ location.reload(); }, 1500);
+                        hideLoading(true);
+                        setTimeout(function(){
+                            alert_msg("success", objData.msg);
+                            location.reload();
+                        }, 900);
                     }else{
-                        alert_msg("error",objData.msg);
+                        hideLoading(false);
+                        setTimeout(function(){
+                            alert_msg("error",objData.msg);
+                        }, 1300);
                     }
                 }
-                loading.style.display = "none";
                 return false;
             }
         }
@@ -285,7 +376,7 @@ document.addEventListener('DOMContentLoaded',function(){
         var transactions_invoice = document.querySelector("#transactions_invoice");
         transactions_invoice.onsubmit = function(e){
             e.preventDefault();
-            loading.style.display = "flex";
+            showInvoiceLoading('Guardando configuración de facturación...');
             tinyMCE.triggerSave();
             var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             var ajaxUrl = base_url+'/business/update_invoice';
@@ -296,13 +387,18 @@ document.addEventListener('DOMContentLoaded',function(){
                 if(request.readyState == 4 && request.status == 200){
                     var objData = JSON.parse(request.responseText);
                     if(objData.status == "success"){
-                        alert_msg("success", objData.msg);
-                        setTimeout(function(){ location.reload(); }, 1500);
+                        hideLoading(true);
+                        setTimeout(function(){
+                            alert_msg("success", objData.msg);
+                            location.reload();
+                        }, 900);
                     }else{
-                        alert_msg("error",objData.msg);
+                        hideLoading(false);
+                        setTimeout(function(){
+                            alert_msg("error",objData.msg);
+                        }, 1300);
                     }
                 }
-                loading.style.display = "none";
                 return false;
             }
         }
@@ -316,7 +412,7 @@ document.addEventListener('DOMContentLoaded',function(){
               alert_msg("info","Selecionar una foto para poder realizar este cambio.");
               return false;
             }
-            loading.style.display = "flex";
+            showUploadLoading('Subiendo logo principal...');
             var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             var ajaxUrl = base_url+'/business/main_logo';
             var formData = new FormData(transactions_logofac);
@@ -326,13 +422,18 @@ document.addEventListener('DOMContentLoaded',function(){
                 if(request.readyState == 4 && request.status == 200){
                     var objData = JSON.parse(request.responseText);
                     if(objData.status == "success"){
-                        alert_msg("success", objData.msg);
-                        setTimeout(function(){ location.reload(); }, 1500);
+                        hideLoading(true);
+                        setTimeout(function(){
+                            alert_msg("success", objData.msg);
+                            location.reload();
+                        }, 900);
                     }else{
-                        alert_msg("error",objData.msg);
+                        hideLoading(false);
+                        setTimeout(function(){
+                            alert_msg("error",objData.msg);
+                        }, 1300);
                     }
                 }
-                loading.style.display = "none";
                 return false;
             }
         }
@@ -346,7 +447,7 @@ document.addEventListener('DOMContentLoaded',function(){
               alert_msg("info","Selecionar una foto para poder realizar este cambio.");
               return false;
             }
-            loading.style.display = "flex";
+            showUploadLoading('Subiendo logo de acceso...');
             var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             var ajaxUrl = base_url+'/business/login_logo';
             var formData = new FormData(transactions_logo);
@@ -362,7 +463,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         alert_msg("error",objData.msg);
                     }
                 }
-                loading.style.display = "none";
+                hideLoading();
                 return false;
             }
         }
@@ -376,7 +477,7 @@ document.addEventListener('DOMContentLoaded',function(){
               alert_msg("info","Selecionar una foto para poder realizar este cambio.");
               return false;
             }
-            loading.style.display = "flex";
+            showLoading('Subiendo favicon...');
             var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             var ajaxUrl = base_url+'/business/favicon';
             var formData = new FormData(transactions_favicon);
@@ -392,7 +493,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         alert_msg("error",objData.msg);
                     }
                 }
-                loading.style.display = "none";
+                hideLoading();
                 return false;
             }
         }
@@ -401,7 +502,7 @@ document.addEventListener('DOMContentLoaded',function(){
         var transactions_background = document.querySelector("#transactions_background");
         transactions_background.onsubmit = function(e){
             e.preventDefault();
-            loading.style.display = "flex";
+            showLoading('Guardando fondo de pantalla...');
             var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             var ajaxUrl = base_url+'/business/background';
             var formData = new FormData(transactions_background);
@@ -417,7 +518,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         alert_msg("error",objData.msg);
                     }
                 }
-                loading.style.display = "none";
+                hideLoading();
                 return false;
             }
         }
@@ -426,7 +527,7 @@ document.addEventListener('DOMContentLoaded',function(){
         var transactions_google = document.querySelector("#transactions_google");
         transactions_google.onsubmit = function(e){
             e.preventDefault();
-            loading.style.display = "flex";
+            showLoading('Guardando configuración de Google...');
             var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             var ajaxUrl = base_url+'/business/google';
             var formData = new FormData(transactions_google);
@@ -441,7 +542,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         alert_msg("error",objData.msg);
                     }
                 }
-                loading.style.display = "none";
+                hideLoading();
                 return false;
             }
         }
@@ -450,7 +551,7 @@ document.addEventListener('DOMContentLoaded',function(){
         var transactions_reniec = document.querySelector("#transactions_reniec");
         transactions_reniec.onsubmit = function(e){
             e.preventDefault();
-            loading.style.display = "flex";
+            showLoading('Guardando configuración RENIEC...');
             var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             var ajaxUrl = base_url+'/business/reniec';
             var formData = new FormData(transactions_reniec);
@@ -465,7 +566,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         alert_msg("error",objData.msg);
                     }
                 }
-                loading.style.display = "none";
+                hideLoading();
                 return false;
             }
         }
@@ -474,7 +575,7 @@ document.addEventListener('DOMContentLoaded',function(){
         var transactions_email = document.querySelector("#transactions_email");
         transactions_email.onsubmit = function(e){
             e.preventDefault();
-            loading.style.display = "flex";
+            showEmailLoading('Guardando configuración de correo...');
             var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             var ajaxUrl = base_url+'/business/email';
             var formData = new FormData(transactions_email);
@@ -484,12 +585,17 @@ document.addEventListener('DOMContentLoaded',function(){
                 if(request.readyState == 4 && request.status == 200){
                     var objData = JSON.parse(request.responseText);
                     if(objData.status == "success"){
-                        alert_msg("success", objData.msg);
+                        hideLoading(true);
+                        setTimeout(function(){
+                            alert_msg("success", objData.msg);
+                        }, 900);
                     }else{
-                        alert_msg("error",objData.msg);
+                        hideLoading(false);
+                        setTimeout(function(){
+                            alert_msg("error",objData.msg);
+                        }, 1300);
                     }
                 }
-                loading.style.display = "none";
                 return false;
             }
         }
@@ -498,7 +604,7 @@ document.addEventListener('DOMContentLoaded',function(){
         var transactions_apidian_connection = document.querySelector("#transactions_apidian_connection");
         transactions_apidian_connection.onsubmit = function(e){
             e.preventDefault();
-            loading.style.display = "flex";
+            showInvoiceLoading('Conectando con APIDIAN...');
             var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             var ajaxUrl = base_url+'/settings/update_apidian_connection';
             var formData = new FormData(transactions_apidian_connection);
@@ -508,12 +614,17 @@ document.addEventListener('DOMContentLoaded',function(){
                 if(request.readyState == 4 && request.status == 200){
                     var objData = JSON.parse(request.responseText);
                     if(objData.status == "success"){
-                        alert_msg("success", objData.msg);
+                        hideLoading(true);
+                        setTimeout(function(){
+                            alert_msg("success", objData.msg);
+                        }, 900);
                     }else{
-                        alert_msg("error",objData.msg);
+                        hideLoading(false);
+                        setTimeout(function(){
+                            alert_msg("error",objData.msg);
+                        }, 1300);
                     }
                 }
-                loading.style.display = "none";
                 return false;
             }
         }
@@ -522,7 +633,7 @@ document.addEventListener('DOMContentLoaded',function(){
         var transactions_taxes = document.querySelector("#transactions_taxes");
         transactions_taxes.onsubmit = function(e){
             e.preventDefault();
-            loading.style.display = "flex";
+            showDatabaseLoading('Guardando configuración de impuestos...');
             var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             var ajaxUrl = base_url+'/settings/update_taxes';
             var formData = new FormData(transactions_taxes);
@@ -532,12 +643,17 @@ document.addEventListener('DOMContentLoaded',function(){
                 if(request.readyState == 4 && request.status == 200){
                     var objData = JSON.parse(request.responseText);
                     if(objData.status == "success"){
-                        alert_msg("success", objData.msg);
+                        hideLoading(true);
+                        setTimeout(function(){
+                            alert_msg("success", objData.msg);
+                        }, 900);
                     }else{
-                        alert_msg("error",objData.msg);
+                        hideLoading(false);
+                        setTimeout(function(){
+                            alert_msg("error",objData.msg);
+                        }, 1300);
                     }
                 }
-                loading.style.display = "none";
                 return false;
             }
         }
@@ -546,7 +662,7 @@ document.addEventListener('DOMContentLoaded',function(){
         var transactions_resolution = document.querySelector("#transactions_resolution");
         transactions_resolution.onsubmit = function(e){
             e.preventDefault();
-            loading.style.display = "flex";
+            showInvoiceLoading('Guardando resolución de facturación...');
             var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             var ajaxUrl = base_url+'/settings/save_resolution';
             var formData = new FormData(transactions_resolution);
@@ -556,14 +672,19 @@ document.addEventListener('DOMContentLoaded',function(){
                 if(request.readyState == 4 && request.status == 200){
                     var objData = JSON.parse(request.responseText);
                     if(objData.status == "success"){
-                        alert_msg("success", objData.msg);
-                        cancelResolution();
-                        loadResolutions();
+                        hideLoading(true);
+                        setTimeout(function(){
+                            alert_msg("success", objData.msg);
+                            cancelResolution();
+                            loadResolutions();
+                        }, 900);
                     }else{
-                        alert_msg("error",objData.msg);
+                        hideLoading(false);
+                        setTimeout(function(){
+                            alert_msg("error",objData.msg);
+                        }, 1300);
                     }
                 }
-                loading.style.display = "none";
                 return false;
             }
         }
@@ -573,49 +694,82 @@ document.addEventListener('DOMContentLoaded',function(){
         var transactions_config_apidian = document.querySelector("#transactions_config_apidian");
         transactions_config_apidian.onsubmit = function(e){
             e.preventDefault();
-            var confirmar = confirm("¿Está seguro de registrar la empresa en APIDIAN? Este proceso solo debe ejecutarse una vez.");
-            if(!confirmar) return false;
-            loading.style.display = "flex";
-            
-            var ajaxUrl = base_url+'/settings/configure_apidian_company';
-            var formData = new FormData(transactions_config_apidian);
-            
-            // Debug: mostrar datos que se envían
-            console.log('Enviando a:', ajaxUrl);
-            for (var pair of formData.entries()) {
-                console.log(pair[0] + ': ' + pair[1]);
-            }
-            
-            var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-            request.open("POST", ajaxUrl, true);
-            
-            request.onload = function() {
-                loading.style.display = "none";
-                console.log('Status:', request.status);
-                console.log('Response:', request.responseText);
-                
-                if (request.status === 200) {
-                    try {
-                        var objData = JSON.parse(request.responseText);
-                        if (objData.status === "success") {
-                            document.getElementById('apidian_token').value = objData.token;
-                            alert_msg("success", objData.msg + "\nToken: " + objData.token);
-                            setTimeout(function(){ location.reload(); }, 3000);
-                        } else {
-                            alert_msg("error", objData.msg);
+            $.confirm({
+                theme: 'modern',
+                draggable: false,
+                closeIcon: true,
+                animationBounce: 2.5,
+                type: 'blue',
+                icon: 'fas fa-building',
+                title: 'REGISTRAR EMPRESA EN APIDIAN',
+                content: '<div style="text-align:center;">' +
+                    '<div style="font-size:48px;color:#348fe2;margin-bottom:15px;"><i class="fas fa-building"></i></div>' +
+                    '<p style="font-size:14px;color:#555;margin-bottom:10px;">¿Está seguro de registrar la empresa en APIDIAN?</p>' +
+                    '<div style="background:#fff3cd;padding:12px;border-radius:8px;margin-top:10px;border:1px solid #ffc107;">' +
+                    '<i class="fas fa-exclamation-triangle" style="color:#856404;font-size:16px;"></i> ' +
+                    '<span style="font-size:12px;color:#856404;">Este proceso solo debe ejecutarse una vez.</span></div>' +
+                    '</div>',
+                buttons: {
+                    register: {
+                        text: '<i class="fas fa-check mr-1"></i>Registrar Empresa',
+                        btnClass: 'btn-blue',
+                        action: function(){
+                            showInvoiceLoading('Registrando empresa en APIDIAN...');
+                            
+                            var ajaxUrl = base_url+'/settings/configure_apidian_company';
+                            var formData = new FormData(transactions_config_apidian);
+                            
+                            var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+                            request.open("POST", ajaxUrl, true);
+                            
+                            request.onload = function() {
+                                if (request.status === 200) {
+                                    try {
+                                        var objData = JSON.parse(request.responseText);
+                                        if (objData.status === "success") {
+                                            hideLoading(true);
+                                            setTimeout(function(){
+                                                document.getElementById('apidian_token').value = objData.token;
+                                                alert_msg("success", objData.msg + "\nToken: " + objData.token);
+                                                setTimeout(function(){ location.reload(); }, 3000);
+                                            }, 900);
+                                        } else {
+                                            hideLoading(false);
+                                            setTimeout(function(){
+                                                alert_msg("error", objData.msg);
+                                            }, 1300);
+                                        }
+                                    } catch (parseError) {
+                                        hideLoading(false);
+                                        setTimeout(function(){
+                                            alert_msg("error", "Error al procesar la respuesta del servidor");
+                                        }, 1300);
+                                    }
+                                } else {
+                                    hideLoading(false);
+                                    setTimeout(function(){
+                                        alert_msg("error", "Error del servidor: " + request.status);
+                                    }, 1300);
+                                }
+                            };
+                            
+                            request.onerror = function() {
+                                hideLoading(false);
+                                setTimeout(function(){
+                                    alert_msg("error", "Error de conexión");
+                                }, 1300);
+                            };
+                            
+                            request.send(formData);
                         }
-                    } catch (parseError) {
-                        console.error('Parse error:', parseError);
-                        alert_msg("error", "Error al procesar la respuesta del servidor");
+                    },
+                    cancel: {
+                        text: '<i class="fas fa-times mr-1"></i>Cancelar',
+                        btnClass: 'btn-default'
                     }
-                } else {
-                    console.error('HTTP Error:', request.status);
-                    alert_msg("error", "Error del servidor: " + request.status);
                 }
-            };
-            
-            request.onerror = function() {
-                loading.style.display = "none";
+            });
+            return false;
                 console.error('Error de conexión');
                 alert_msg("error", "Error de conexión con el servidor");
             };
@@ -633,7 +787,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 alert_msg("error","Ingrese la contraseña del certificado");
                 return false;
             }
-            loading.style.display = "flex";
+            showLoading('Configurando certificado digital...');
             
             var ajaxUrl = base_url+'/settings/configure_certificate';
             var formData = new FormData(transactions_certificate);
@@ -644,7 +798,7 @@ document.addEventListener('DOMContentLoaded',function(){
             request.open("POST", ajaxUrl, true);
             
             request.onload = function() {
-                loading.style.display = "none";
+                hideLoading();
                 if (request.status === 200) {
                     try {
                         var objData = JSON.parse(request.responseText);
@@ -663,7 +817,7 @@ document.addEventListener('DOMContentLoaded',function(){
             };
             
             request.onerror = function() {
-                loading.style.display = "none";
+                hideLoading();
                 alert_msg("error", "Error de conexión");
             };
             
@@ -687,7 +841,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 return false;
             }
             
-            loading.style.display = "flex";
+            showLoading('Configurando software DIAN...');
             var ajaxUrl = base_url+'/settings/configure_software';
             var formData = new FormData(transactions_software);
             
@@ -695,7 +849,7 @@ document.addEventListener('DOMContentLoaded',function(){
             request.open("POST", ajaxUrl, true);
             
             request.onload = function() {
-                loading.style.display = "none";
+                hideLoading();
                 if (request.status === 200) {
                     try {
                         var objData = JSON.parse(request.responseText);
@@ -714,7 +868,7 @@ document.addEventListener('DOMContentLoaded',function(){
             };
             
             request.onerror = function() {
-                loading.style.display = "none";
+                hideLoading();
                 alert_msg("error", "Error de conexión");
             };
             

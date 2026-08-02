@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function(){
                     return false;
                   }
                 }
-                loading.style.display = "flex";
+                showUploadLoading('Finalizando instalación, subiendo imágenes...');
                 var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
                 var ajaxUrl = base_url+'/installations/complete_installation';
                 var formData = new FormData(transactions);
@@ -28,71 +28,79 @@ document.addEventListener('DOMContentLoaded', function(){
                     if(request.readyState == 4 && request.status == 200){
                         var objData = JSON.parse(request.responseText);
                         if(objData.status == "success"){
-                          var alsup = $.confirm({
-                              theme: 'modern',
-                              draggable: false,
-                              closeIcon: false,
-                              animationBounce: 2.5,
-                              escapeKey: false,
-                              type: 'success',
-                              icon: 'far fa-check-circle',
-                              title: 'OPERACIÓN EXITOSA',
-                              content: objData.msg,
-                              buttons: {
-                                  Eliminar: {
-                                      text: 'Aceptar',
-                                      btnClass: 'btn-success',
-                                      action: function () {
-                                        $(location).attr('href', base_url+"/installations");
+                          hideLoading(true);
+                          setTimeout(function(){
+                              var alsup = $.confirm({
+                                  theme: 'modern',
+                                  draggable: false,
+                                  closeIcon: false,
+                                  animationBounce: 2.5,
+                                  escapeKey: false,
+                                  type: 'success',
+                                  icon: 'far fa-check-circle',
+                                  title: 'OPERACIÓN EXITOSA',
+                                  content: objData.msg,
+                                  buttons: {
+                                      Eliminar: {
+                                          text: 'Aceptar',
+                                          btnClass: 'btn-success',
+                                          action: function () {
+                                            $(location).attr('href', base_url+"/installations");
+                                          }
                                       }
                                   }
-                              }
-                          });
+                              });
+                          }, 900);
                         }else if(objData.status == "info"){
-                          var alsup = $.confirm({
-                            theme: 'modern',
-                            draggable: false,
-                            closeIcon: false,
-                            animationBounce: 2.5,
-                            escapeKey: false,
-                            type: 'info',
-                            icon: 'far fa-question-circle',
-                            title: 'IMPORTANTE',
-                            content: objData.msg,
-                            buttons: {
-                              Eliminar: {
-                                text: 'Aceptar',
-                                btnClass: 'btn-info',
-                                action: function () {
-                                  $(location).attr('href', base_url+"/installations");
+                          hideLoading();
+                          setTimeout(function(){
+                              var alsup = $.confirm({
+                                theme: 'modern',
+                                draggable: false,
+                                closeIcon: false,
+                                animationBounce: 2.5,
+                                escapeKey: false,
+                                type: 'info',
+                                icon: 'far fa-question-circle',
+                                title: 'IMPORTANTE',
+                                content: objData.msg,
+                                buttons: {
+                                  Eliminar: {
+                                    text: 'Aceptar',
+                                    btnClass: 'btn-info',
+                                    action: function () {
+                                      $(location).attr('href', base_url+"/installations");
+                                    }
+                                  }
                                 }
-                              }
-                            }
-                          });
+                              });
+                          }, 300);
                         }else{
-                          var alsup = $.confirm({
-                            theme: 'modern',
-                            draggable: false,
-                            closeIcon: false,
-                            animationBounce: 2.5,
-                            escapeKey: false,
-                            type: 'red',
-                            icon: 'far fa-times-circle',
-                            title: 'ERROR',
-                            content: objData.msg,
-                            buttons: {
-                              Eliminar: {
-                                text: 'Aceptar',
-                                btnClass: 'btn-red',
-                                action: function () {
-                                  $(location).attr('href', base_url+"/installations");
+                          hideLoading(false);
+                          setTimeout(function(){
+                              var alsup = $.confirm({
+                                theme: 'modern',
+                                draggable: false,
+                                closeIcon: false,
+                                animationBounce: 2.5,
+                                escapeKey: false,
+                                type: 'red',
+                                icon: 'far fa-times-circle',
+                                title: 'ERROR',
+                                content: objData.msg,
+                                buttons: {
+                                  Eliminar: {
+                                    text: 'Aceptar',
+                                    btnClass: 'btn-red',
+                                    action: function () {
+                                      $(location).attr('href', base_url+"/installations");
+                                    }
+                                  }
                                 }
-                              }
-                            }
-                          });
+                              });
+                          }, 1300);
                         }
                     }
-                    loading.style.display = "none";
                     return false;
                 }
             }

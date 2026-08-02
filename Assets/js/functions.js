@@ -3,6 +3,114 @@ $('body').tooltip({
 });
 var concurrence = 15,timechar,interval;
 var loading = document.querySelector("#loading");
+var loadingTitle = document.querySelector(".loading-title");
+var loadingMessage = document.querySelector(".loading-message");
+var loadingIcon = document.querySelector(".loading-icon-content i");
+
+var loadingIcons = {
+    default: 'fas fa-cog fa-spin',
+    invoice: 'fas fa-file-invoice-dollar',
+    payment: 'fas fa-credit-card',
+    email: 'fas fa-envelope',
+    download: 'fas fa-download',
+    upload: 'fas fa-cloud-upload-alt',
+    process: 'fas fa-cogs',
+    database: 'fas fa-database',
+    send: 'fas fa-paper-plane',
+    check: 'fas fa-check',
+    warning: 'fas fa-exclamation-triangle',
+    shield: 'fas fa-shield-alt',
+    lock: 'fas fa-lock'
+};
+
+function showLoading(message, title, icon){
+    if(loading){
+        loading.classList.remove('loading-success', 'loading-error');
+        if(loadingTitle) loadingTitle.textContent = title || 'Procesando';
+        if(loadingMessage) loadingMessage.textContent = message || 'Espere por favor...';
+        if(loadingIcon){
+            loadingIcon.className = icon || loadingIcons.default;
+        }
+        loading.style.display = "flex";
+        loading.style.opacity = "0";
+        requestAnimationFrame(function(){
+            requestAnimationFrame(function(){
+                loading.style.opacity = "1";
+                loading.classList.add('active');
+            });
+        });
+    }
+}
+
+function hideLoading(success){
+    if(loading){
+        if(success === true){
+            loading.classList.add('loading-success');
+            loading.classList.remove('loading-error');
+            if(loadingIcon) loadingIcon.className = loadingIcons.check;
+            if(loadingTitle) loadingTitle.textContent = '¡Completado!';
+            if(loadingMessage) loadingMessage.textContent = 'Operación exitosa';
+            setTimeout(function(){
+                closeLoading();
+            }, 800);
+        } else if(success === false){
+            loading.classList.add('loading-error');
+            loading.classList.remove('loading-success');
+            if(loadingIcon) loadingIcon.className = loadingIcons.warning;
+            if(loadingTitle) loadingTitle.textContent = 'Error';
+            if(loadingMessage) loadingMessage.textContent = 'Ocurrió un problema';
+            setTimeout(function(){
+                closeLoading();
+            }, 1200);
+        } else {
+            closeLoading();
+        }
+    }
+}
+
+function closeLoading(){
+    if(loading){
+        loading.style.opacity = "0";
+        loading.classList.remove('active');
+        setTimeout(function(){
+            loading.style.display = "none";
+            loading.classList.remove('loading-success', 'loading-error');
+        }, 300);
+    }
+}
+
+function updateLoadingMessage(message, title){
+    if(loadingMessage) loadingMessage.textContent = message || '';
+    if(loadingTitle && title) loadingTitle.textContent = title;
+}
+
+function showInvoiceLoading(message){
+    showLoading(message || 'Enviando factura a la DIAN...', 'Facturación Electrónica', loadingIcons.invoice);
+}
+
+function showPaymentLoading(message){
+    showLoading(message || 'Procesando pago...', 'Registrando Pago', loadingIcons.payment);
+}
+
+function showEmailLoading(message){
+    showLoading(message || 'Enviando correo electrónico...', 'Enviando', loadingIcons.email);
+}
+
+function showDatabaseLoading(message){
+    showLoading(message || 'Procesando datos...', 'Base de Datos', loadingIcons.database);
+}
+
+function showUploadLoading(message){
+    showLoading(message || 'Subiendo archivo...', 'Subiendo', loadingIcons.upload);
+}
+
+function showDownloadLoading(message){
+    showLoading(message || 'Descargando archivo...', 'Descargando', loadingIcons.download);
+}
+
+function showProcessLoading(message){
+    showLoading(message || 'Procesando...', 'Procesando', loadingIcons.process);
+}
 function table_configuration(tableid,text){
 	var buttons = [
 		{

@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function(){
         transactions_data.onsubmit = function(e){
             e.preventDefault();
             if($('#transactions_data').parsley().isValid()){
-                loading.style.display = "flex";
+                showDatabaseLoading('Guardando datos personales...');
                 var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
                 var ajaxUrl = base_url+'/users/modify_data';
                 var formData = new FormData(transactions_data);
@@ -14,31 +14,36 @@ document.addEventListener('DOMContentLoaded', function(){
                     if(request.readyState == 4 && request.status == 200){
                         var objData = JSON.parse(request.responseText);
                         if(objData.status == "success"){
-                            var alsup = $.confirm({
-                                theme: 'modern',
-                                draggable: false,
-                                closeIcon: false,
-                                animationBounce: 2.5,
-                                escapeKey: false,
-                                type: 'success',
-                                icon: 'far fa-check-circle',
-                                title: 'OPERACIÓN EXITOSA',
-                                content: objData.msg,
-                                buttons: {
-                                    Eliminar: {
-                                        text: 'Aceptar',
-                                        btnClass: 'btn-success',
-                                        action: function () {
-                                            location.reload();
+                            hideLoading(true);
+                            setTimeout(function(){
+                                var alsup = $.confirm({
+                                    theme: 'modern',
+                                    draggable: false,
+                                    closeIcon: false,
+                                    animationBounce: 2.5,
+                                    escapeKey: false,
+                                    type: 'success',
+                                    icon: 'far fa-check-circle',
+                                    title: 'OPERACIÓN EXITOSA',
+                                    content: objData.msg,
+                                    buttons: {
+                                        Eliminar: {
+                                            text: 'Aceptar',
+                                            btnClass: 'btn-success',
+                                            action: function () {
+                                                location.reload();
+                                            }
                                         }
                                     }
-                                }
-                            });
+                                });
+                            }, 900);
                         }else{
-                            alert_msg("error",objData.msg);
+                            hideLoading(false);
+                            setTimeout(function(){
+                                alert_msg("error",objData.msg);
+                            }, 1300);
                         }
                     }
-                    loading.style.display = "none";
                     return false;
                 }
             }
@@ -61,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function(){
                         return false;
                     }
                 }
-                loading.style.display = "flex";
+                showDatabaseLoading('Actualizando contraseña...');
                 var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
                 var ajaxUrl = base_url+'/users/modify_password';
                 var formData = new FormData(transactions_password);
@@ -71,13 +76,18 @@ document.addEventListener('DOMContentLoaded', function(){
                     if(request.readyState == 4 && request.status == 200){
                         var objData = JSON.parse(request.responseText);
                         if(objData.status == "success"){
-                            transactions_password.reset();
-                            alert_msg("success",objData.msg);
+                            hideLoading(true);
+                            setTimeout(function(){
+                                transactions_password.reset();
+                                alert_msg("success",objData.msg);
+                            }, 900);
                         }else{
-                            alert_msg("error",objData.msg);
+                            hideLoading(false);
+                            setTimeout(function(){
+                                alert_msg("error",objData.msg);
+                            }, 1300);
                         }
                     }
-                    loading.style.display = "none";
                     return false;
                 }
             }
@@ -109,7 +119,7 @@ window.addEventListener('load', function(){
                     }
                     var objeto_url = nav.createObjectURL(this.files[0]);
                     document.querySelector('#image_profile').src = objeto_url;
-                    loading.style.display = "flex";
+                    showLoading('Actualizando foto de perfil...');
                     let request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
                     let ajaxUrl = base_url+'/users/change_profile';
                     let formData = new FormData();
@@ -145,7 +155,7 @@ window.addEventListener('load', function(){
                                 alert_msg("error",objData.msg);
                             }
                         }
-                        loading.style.display = "none";
+                        hideLoading();
                         return false;
                     }
                 }

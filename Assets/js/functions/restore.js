@@ -1,4 +1,3 @@
-var loading = document.querySelector("#loading");
 const showPass = document.querySelectorAll(".showPass");
 const pwFields = document.querySelectorAll("#password");
 const pwShowHide = document.querySelectorAll(".showPassConfirm");
@@ -23,7 +22,7 @@ if(document.querySelector("#transactions_password")){
                     alert_msg("error","Las contraseñas no son iguales.");
                     return false;
                 }
-                loading.style.display = "flex";
+                showDatabaseLoading('Actualizando contraseña...');
                 var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
                 var ajaxUrl = base_url+'/login/update_password';
                 var formData = new FormData(transactions_password);
@@ -34,33 +33,41 @@ if(document.querySelector("#transactions_password")){
                 if(request.status == 200){
                     var objData = JSON.parse(request.responseText);
                     if(objData.status == 'success'){
-                        var alsup = $.confirm({
-                            theme: 'modern',
-                            draggable: false,
-                            closeIcon: false,
-                            animationBounce: 2.5,
-                            escapeKey: false,
-                            type: 'success',
-                            icon: 'far fa-check-circle',
-                            title: 'OPERACIÓN EXITOSA',
-                            content: objData.msg,
-                            buttons: {
-                                Eliminar: {
-                                    text: 'Aceptar',
-                                    btnClass: 'btn-success',
-                                    action: function () {
-                                        $(location).attr('href', base_url+"/login");
+                        hideLoading(true);
+                        setTimeout(function(){
+                            var alsup = $.confirm({
+                                theme: 'modern',
+                                draggable: false,
+                                closeIcon: false,
+                                animationBounce: 2.5,
+                                escapeKey: false,
+                                type: 'success',
+                                icon: 'far fa-check-circle',
+                                title: 'OPERACIÓN EXITOSA',
+                                content: objData.msg,
+                                buttons: {
+                                    Eliminar: {
+                                        text: 'Aceptar',
+                                        btnClass: 'btn-success',
+                                        action: function () {
+                                            $(location).attr('href', base_url+"/login");
+                                        }
                                     }
                                 }
-                            }
-                        });
+                            });
+                        }, 900);
                     }else{
-                        alert_msg("error",objData.msg);
+                        hideLoading(false);
+                        setTimeout(function(){
+                            alert_msg("error",objData.msg);
+                        }, 1300);
                     }
                 }else{
-                    alert_msg("error","Error en el proceso.");
+                    hideLoading(false);
+                    setTimeout(function(){
+                        alert_msg("error","Error en el proceso.");
+                    }, 1300);
                 }
-                loading.style.display = "none";
             }
         }
     }

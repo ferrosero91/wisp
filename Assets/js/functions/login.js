@@ -1,4 +1,3 @@
-var loading = document.querySelector("#loading");
 const pwShowHide = document.querySelectorAll(".showHidePw");
 const pwFields = document.querySelectorAll("#password");
 document.addEventListener('DOMContentLoaded', function(){
@@ -21,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function(){
 					$('#password').focus();
 					return false;
 				}
-				loading.style.display = "flex";
+				showLoading('Verificando credenciales...', 'Iniciando Sesión', 'fas fa-shield-alt');
 				var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
 				var ajaxUrl = base_url+'/login/validation';
 				var formData = new FormData(transactions);
@@ -32,18 +31,29 @@ document.addEventListener('DOMContentLoaded', function(){
 					if(request.status == 200){
 						var objData = JSON.parse(request.responseText);
 						if(objData.status == "success"){
-							window.location.reload(false);
+							hideLoading(true);
+							setTimeout(function(){
+								window.location.reload(false);
+							}, 600);
 						}else if(objData.status == "warning"){
-              alert_msg("warning",objData.msg);
-							document.querySelector('#password').value = "";
+              hideLoading();
+              setTimeout(function(){
+                  alert_msg("warning",objData.msg);
+                  document.querySelector('#password').value = "";
+              }, 300);
             }else{
-						  alert_msg("error",objData.msg);
-							document.querySelector('#password').value = "";
+              hideLoading(false);
+              setTimeout(function(){
+                  alert_msg("error",objData.msg);
+                  document.querySelector('#password').value = "";
+              }, 1300);
 						}
 					}else{
-            alert_msg("error","Hubo un error, no se pudo realizar el proceso.");
+            hideLoading(false);
+            setTimeout(function(){
+                alert_msg("error","Hubo un error, no se pudo realizar el proceso.");
+            }, 1300);
 					}
-					loading.style.display = "none";
 					return false;
 				}
 			}
@@ -54,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function(){
 		transactions_reset.onsubmit = function(e){
 			e.preventDefault();
 			if($('#transactions_reset').parsley().isValid()){
-				loading.style.display = "flex";
+				showEmailLoading('Enviando solicitud de recuperación...');
 				var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
 				var ajaxUrl = base_url+'/login/reset';
 				var formData = new FormData(transactions_reset);
@@ -64,18 +74,26 @@ document.addEventListener('DOMContentLoaded', function(){
 					if(request.readyState == 4 && request.status == 200){
 						var objData = JSON.parse(request.responseText);
 						if(objData.status == 'success'){
-							$('#modal-reset').modal("hide");
-							transactions_reset.reset();
-							alert_msg("success",objData.msg);
+							hideLoading(true);
+							setTimeout(function(){
+								$('#modal-reset').modal("hide");
+								transactions_reset.reset();
+								alert_msg("success",objData.msg);
+							}, 900);
 						}else if(objData.status == 'not_exist'){
-							$('#modal-reset').modal("hide");
-							transactions_reset.reset();
-							alert_msg("info",objData.msg);
+							hideLoading();
+							setTimeout(function(){
+								$('#modal-reset').modal("hide");
+								transactions_reset.reset();
+								alert_msg("info",objData.msg);
+							}, 300);
 						}else{
-							alert_msg("error",objData.msg);
+							hideLoading(false);
+							setTimeout(function(){
+								alert_msg("error",objData.msg);
+							}, 1300);
 						}
 					}
-					loading.style.display = "none";
 					return false;
 				}
 			}

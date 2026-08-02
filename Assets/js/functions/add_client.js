@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function(){
         transactions.onsubmit = function(e){
             e.preventDefault();
             if($('#transactions').parsley().isValid()){
-                loading.style.display = "flex";
+                showDatabaseLoading('Registrando cliente y contrato...');
                 var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
                 var ajaxUrl = base_url+'/customers/register_contract';
                 var formData = new FormData(transactions);
@@ -14,33 +14,41 @@ document.addEventListener('DOMContentLoaded', function(){
                     if(request.readyState == 4 && request.status == 200){
                         var objData = JSON.parse(request.responseText);
                         if(objData.status == 'success'){
-                          var alsup = $.confirm({
-                              theme: 'modern',
-                              draggable: false,
-                              closeIcon: false,
-                              animationBounce: 2.5,
-                              escapeKey: false,
-                              type: 'success',
-                              icon: 'far fa-check-circle',
-                              title: 'OPERACIÓN EXITOSA',
-                              content: objData.msg,
-                              buttons: {
-                                  Eliminar: {
-                                      text: 'Aceptar',
-                                      btnClass: 'btn-success',
-                                      action: function () {
-                                          $(location).attr('href', base_url+"/customers/view_client/"+objData.id);
+                          hideLoading(true);
+                          setTimeout(function(){
+                              var alsup = $.confirm({
+                                  theme: 'modern',
+                                  draggable: false,
+                                  closeIcon: false,
+                                  animationBounce: 2.5,
+                                  escapeKey: false,
+                                  type: 'success',
+                                  icon: 'far fa-check-circle',
+                                  title: 'OPERACIÓN EXITOSA',
+                                  content: objData.msg,
+                                  buttons: {
+                                      Eliminar: {
+                                          text: 'Aceptar',
+                                          btnClass: 'btn-success',
+                                          action: function () {
+                                              $(location).attr('href', base_url+"/customers/view_client/"+objData.id);
+                                          }
                                       }
                                   }
-                              }
-                          });
+                              });
+                          }, 900);
                         }else if(objData.status == 'exists'){
-                            alert_msg("warning",objData.msg);
+                            hideLoading();
+                            setTimeout(function(){
+                                alert_msg("warning",objData.msg);
+                            }, 300);
                         }else{
-                            alert_msg("error",objData.msg);
+                            hideLoading(false);
+                            setTimeout(function(){
+                                alert_msg("error",objData.msg);
+                            }, 1300);
                         }
                     }
-                    loading.style.display = "none";
                     return false;
                 }
            }

@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function(){
         transactions.onsubmit = function(e){
             e.preventDefault();
             if($('#transactions').parsley().isValid()){
-                loading.style.display = "flex";
+                showLoading('Guardando información, espere por favor...');
                 var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
                 var ajaxUrl = base_url+'/vouchers/action';
                 var formData = new FormData(transactions);
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function(){
                             alert_msg("error",objData.msg);
                         }
                     }
-                    loading.style.display = "none";
+                    hideLoading();
                     return false;
                 }
             }
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function(){
         transactions_serie.onsubmit = function(e) {
             e.preventDefault();
             if($('#transactions_serie').parsley().isValid()){
-                loading.style.display = "flex";
+                showLoading('Guardando serie...');
                 var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
                 var ajaxUrl = base_url+'/vouchers/action_serie';
                 var formData = new FormData(transactions_serie);
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function(){
                             alert_msg("error",objData.msg);
                         }
                     }
-                    loading.style.display = "none";
+                    hideLoading();
                     return false;
                 }
             }

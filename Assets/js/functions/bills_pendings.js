@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function(){
         transactions_payments.onsubmit = function(e){
             e.preventDefault();
             if($('#transactions_payments').parsley().isValid()){
-                loading.style.display = "flex";
+                showLoading('Registrando pago...');
                 var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
                 var ajaxUrl = base_url+'/bills/create_payment';
                 var formData = new FormData(transactions_payments);
@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function(){
                             alert_msg("error",objData.msg);
                         }
                     }
-                    loading.style.display = "none";
+                    hideLoading();
                     return false;
                 }
             }
@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function(){
                   return false;
               }
             }
-            loading.style.display = "flex";
+            showLoading('Guardando factura...');
             var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             var ajaxUrl = base_url+'/bills/action_bill';
             var formData = new FormData(transactions_facser);
@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function(){
                         alert_msg("error",objData.msg);
                     }
                 }
-                loading.style.display = "none";
+                hideLoading();
                 return false;
             }
         }
@@ -663,7 +663,7 @@ function cancel(idbill,invoice){
 /* ENVIAR CORREO */
 function send_email(idbill,idclient,type){
     $('[data-toggle="tooltip"]').tooltip('hide');
-    loading.style.display = "flex";
+    showEmailLoading('Enviando factura por correo electrónico...');
     var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
     var ajaxUrl = base_url+'/bills/send_email/'+idbill+'/'+idclient+'/'+type;
     request.open("GET",ajaxUrl,true);
@@ -672,14 +672,22 @@ function send_email(idbill,idclient,type){
         if(request.readyState == 4 && request.status == 200){
             var objData = JSON.parse(request.responseText);
             if(objData.status == 'success'){
-                alert_msg("success",objData.msg);
+                hideLoading(true);
+                setTimeout(function(){
+                    alert_msg("success",objData.msg);
+                }, 900);
             }else if(objData.status == 'not_exist'){
-                alert_msg("info",objData.msg);
+                hideLoading();
+                setTimeout(function(){
+                    alert_msg("info",objData.msg);
+                }, 300);
             }else{
-                alert_msg("error",objData.msg);
+                hideLoading(false);
+                setTimeout(function(){
+                    alert_msg("error",objData.msg);
+                }, 1300);
             }
         }
-        loading.style.display = "none";
         return false;
     }
 }

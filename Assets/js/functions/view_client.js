@@ -261,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function(){
       transactions_client.onsubmit = function(e){
           e.preventDefault();
           if($('#transactions_client').parsley().isValid()){
-              loading.style.display = "flex";
+              showLoading('Guardando datos del cliente...');
               var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
               var ajaxUrl = base_url+'/customers/modify_client';
               var formData = new FormData(transactions_client);
@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function(){
                           alert_msg("error",objData.msg);
                       }
                   }
-                  loading.style.display = "none";
+                  hideLoading();
                   return false;
               }
           }
@@ -294,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function(){
                 alert_msg("info","No seleccionaste ningún asunto, seleccione uno.");
                 return false;
               }
-              loading.style.display = "flex";
+              showLoading('Guardando ticket...');
               var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
               var ajaxUrl = base_url+'/customers/action_ticket';
               var formData = new FormData(transactions_ticket);
@@ -328,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function(){
                           alert_msg("error",objData.msg);
                       }
                   }
-                  loading.style.display = "none";
+                  hideLoading();
                   return false;
               }
           }
@@ -339,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function(){
       transactions_internet.onsubmit = function(e){
           e.preventDefault();
           if($('#transactions_internet').parsley().isValid()){
-              loading.style.display = "flex";
+              showLoading('Guardando servicio...');
               var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
               var ajaxUrl = base_url+'/customers/action_service';
               var formData = new FormData(transactions_internet);
@@ -362,7 +362,7 @@ document.addEventListener('DOMContentLoaded', function(){
                           alert_msg("error",objData.msg);
                       }
                   }
-                  loading.style.display = "none";
+                  hideLoading();
                   return false;
               }
           }
@@ -373,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function(){
       transactions_personalized.onsubmit = function(e){
           e.preventDefault();
           if($('#transactions_personalized').parsley().isValid()){
-              loading.style.display = "flex";
+              showLoading('Guardando servicio...');
               var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
               var ajaxUrl = base_url+'/customers/action_service';
               var formData = new FormData(transactions_personalized);
@@ -396,7 +396,7 @@ document.addEventListener('DOMContentLoaded', function(){
                           alert_msg("error",objData.msg);
                       }
                   }
-                  loading.style.display = "none";
+                  hideLoading();
                   return false;
               }
           }
@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function(){
       var transactions_contract = document.querySelector("#transactions_contract");
       transactions_contract.onsubmit = function(e){
           e.preventDefault();
-          loading.style.display = "flex";
+          showLoading('Guardando contrato...');
           var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
           var ajaxUrl = base_url+'/customers/modify_contract';
           var formData = new FormData(transactions_contract);
@@ -421,7 +421,7 @@ document.addEventListener('DOMContentLoaded', function(){
                       alert_msg("error",objData.msg);
                   }
               }
-              loading.style.display = "none";
+              hideLoading();
               return false;
           }
       }
@@ -436,7 +436,7 @@ document.addEventListener('DOMContentLoaded', function(){
             alert_msg("error","No hay productos, agregué uno o mas para poder realizar la venta.");
             return false;
           }
-          loading.style.display = "flex";
+          showLoading('Guardando factura...');
           var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
           var ajaxUrl = base_url+'/customers/action_bill';
           var formData = new FormData(transactions_free);
@@ -495,7 +495,7 @@ document.addEventListener('DOMContentLoaded', function(){
                       alert_msg("error",objData.msg);
                   }
               }
-              loading.style.display = "none";
+              hideLoading();
               return false;
           }
       }
@@ -518,7 +518,7 @@ document.addEventListener('DOMContentLoaded', function(){
                 return false;
             }
           }
-          loading.style.display = "flex";
+          showLoading('Guardando factura...');
           var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
           var ajaxUrl = base_url+'/customers/action_bill';
           var formData = new FormData(transactions_facser);
@@ -539,7 +539,7 @@ document.addEventListener('DOMContentLoaded', function(){
                       alert_msg("error",objData.msg);
                   }
               }
-              loading.style.display = "none";
+              hideLoading();
               return false;
           }
       }
@@ -549,7 +549,7 @@ document.addEventListener('DOMContentLoaded', function(){
     transactions_payments.onsubmit = function(e){
       e.preventDefault();
       if($('#transactions_payments').parsley().isValid()){
-        loading.style.display = "flex";
+        showLoading('Registrando pago...');
         var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
         var ajaxUrl = base_url+'/customers/action_payment';
         var formData = new FormData(transactions_payments);
@@ -607,7 +607,7 @@ document.addEventListener('DOMContentLoaded', function(){
                 alert_msg("error",objData.msg);
             }
           }
-          loading.style.display = "none";
+          hideLoading();
           return false;
         }
       }
@@ -618,7 +618,7 @@ document.addEventListener('DOMContentLoaded', function(){
     transactions_finalize.onsubmit = function(e){
       e.preventDefault();
       if($('#transactions_finalize').parsley().isValid()){
-        loading.style.display = "flex";
+        showLoading('Finalizando ticket, espere por favor...');
         var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
         var ajaxUrl = base_url+'/customers/complete_ticket';
         var formData = new FormData(transactions_finalize);
@@ -641,7 +641,7 @@ document.addEventListener('DOMContentLoaded', function(){
               alert_msg("error",objData.msg);
             }
           }
-          loading.style.display = "none";
+          hideLoading();
           return false;
         }
       }
@@ -1615,7 +1615,7 @@ function print_options(idbill){
 }
 function send_email(idbill,idclient,type){
     $('[data-toggle="tooltip"]').tooltip('hide');
-    loading.style.display = "flex";
+    showEmailLoading('Enviando factura por correo electrónico...');
     var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
     var ajaxUrl = base_url+'/customers/send_email/'+idbill+'/'+idclient+'/'+type;
     request.open("GET",ajaxUrl,true);
@@ -1624,14 +1624,22 @@ function send_email(idbill,idclient,type){
         if(request.readyState == 4 && request.status == 200){
             var objData = JSON.parse(request.responseText);
             if(objData.status == 'success'){
-                alert_msg("success",objData.msg);
+                hideLoading(true);
+                setTimeout(function(){
+                    alert_msg("success",objData.msg);
+                }, 900);
             }else if(objData.status == 'not_exist'){
-                alert_msg("info",objData.msg);
+                hideLoading();
+                setTimeout(function(){
+                    alert_msg("info",objData.msg);
+                }, 300);
             }else{
-                alert_msg("error",objData.msg);
+                hideLoading(false);
+                setTimeout(function(){
+                    alert_msg("error",objData.msg);
+                }, 1300);
             }
         }
-        loading.style.display = "none";
         return false;
     }
 }

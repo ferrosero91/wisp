@@ -113,7 +113,7 @@
     <!-- ================== INICIO ARCHIVOS JS ======== -->
     <script src="<?= base_style() ?>/js/app.min.js"></script>
     <script src="<?= base_style() ?>/js/moment.min.js"></script>
-    <script src="<?= base_style() ?>/js/functions.js"></script>
+    <script src="<?= base_style() ?>/js/functions.js?v=2026080213"></script>
     <script src="<?= base_style() ?>/js/utils.min.js"></script>
     <script src="<?= base_style() ?>/js/initial.min.js"></script>
     <script src="<?= base_style() ?>/js/theme/default.min.js"></script>
@@ -137,7 +137,7 @@
     <!-- ================== FIN API GOOGLE MAPS JS ================== -->
     <?php if(isset($data['page_functions_js'])){ ?>
     <!-- ================== INICIO FUNCION JS ============ -->
-    <script src="<?= base_style() ?>/js/functions/<?= $data['page_functions_js']; ?>?v=2026080101"></script>
+    <script src="<?= base_style() ?>/js/functions/<?= $data['page_functions_js']; ?>?v=2026080213"></script>
     <!-- ================== FIN FUNCION JS =============== -->
      <?php } ?>
     </body>

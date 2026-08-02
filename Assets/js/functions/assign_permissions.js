@@ -9,7 +9,7 @@ if(document.querySelector("#transactions")){
             return false;
         }
 
-        loading.style.display = "flex";
+        showLoading('Asignando permisos...');
         var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
         var ajaxUrl = base_url+'/permissions/assign_permissions';
         var formData = new FormData(transactions);
@@ -24,7 +24,7 @@ if(document.querySelector("#transactions")){
                     alert_msg("error",objData.msg);
                 }
             }
-            loading.style.display = "none";
+            hideLoading();
             return false;
         }
     }

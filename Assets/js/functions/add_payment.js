@@ -163,7 +163,7 @@ function save_payment(e){
     alert_msg("error","El monto a pagar debe ser mayor a 0");
     return false;
   }
-  loading.style.display = "flex";
+  showPaymentLoading('Procesando pagos masivos...');
   var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
   var ajaxUrl = base_url+'/payments/mass_payments';
   var transactions = document.querySelector("#transactions");
@@ -174,27 +174,35 @@ function save_payment(e){
     if(request.readyState == 4 && request.status == 200){
       var objData = JSON.parse(request.responseText);
       if(objData.status == "success"){
-        alert_msg("success",objData.msg);
-        $('#pending_invoices').slideUp().empty();
-        $('#modal-massive-voucher').modal('show');
-        document.querySelector('#text-title-massive-voucher').innerHTML = "Opciones de impresión";
-        document.querySelector('#massive_text_country').innerHTML = "+"+objData.country;
-        document.querySelector('#massive_country_code').value = objData.country;
-        document.querySelector('#massive_bill_number_client').value = objData.mobile;
-        document.querySelector('#massive_client').value = objData.client;
-        document.querySelector('#massive_current_paid').value = objData.current_paid;
-        objData.bills.forEach((bill) => {
-          bills.push(bill);
-        });
+        hideLoading(true);
+        setTimeout(function(){
+            alert_msg("success",objData.msg);
+            $('#pending_invoices').slideUp().empty();
+            $('#modal-massive-voucher').modal('show');
+            document.querySelector('#text-title-massive-voucher').innerHTML = "Opciones de impresión";
+            document.querySelector('#massive_text_country').innerHTML = "+"+objData.country;
+            document.querySelector('#massive_country_code').value = objData.country;
+            document.querySelector('#massive_bill_number_client').value = objData.mobile;
+            document.querySelector('#massive_client').value = objData.client;
+            document.querySelector('#massive_current_paid').value = objData.current_paid;
+            objData.bills.forEach((bill) => {
+              bills.push(bill);
+            });
+        }, 900);
       }else if(objData.status == "warning"){
-        alert_msg("warning",objData.msg);
-        $('#pending_invoices').slideUp().empty();
+        hideLoading();
+        setTimeout(function(){
+            alert_msg("warning",objData.msg);
+            $('#pending_invoices').slideUp().empty();
+        }, 300);
       }else{
-        alert_msg("error",objData.msg);
-        $('#pending_invoices').slideUp().empty();
+        hideLoading(false);
+        setTimeout(function(){
+            alert_msg("error",objData.msg);
+            $('#pending_invoices').slideUp().empty();
+        }, 1300);
       }
     }
-    loading.style.display = "none";
     return false;
   }
 }

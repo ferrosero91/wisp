@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function(){
                     alert_msg("info","No seleccionaste ningún asunto, seleccione uno.");
                      return false;
                 }
-                loading.style.display = "flex";
+                showLoading('Guardando información, espere por favor...');
                 tinyMCE.triggerSave();
                 var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
                 var ajaxUrl = base_url+'/tickets/action';
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function(){
                             alert_msg("error",objData.msg);
                         }
                     }
-                    loading.style.display = "none";
+                    hideLoading();
                     return false;
                 }
             }

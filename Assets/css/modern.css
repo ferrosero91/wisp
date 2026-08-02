@@ -42,13 +42,7 @@ a:hover{
   background-color: var(--m-primary);
   color: #fff;
 }
-#loading{
-  background: var(--m-body-bg);
-}
-.loading-spinner{
-  border: 3px solid rgba(15,28,46,.12);
-  border-top-color: var(--m-primary);
-}
+/* Loading - handled by inline styles */
 
 /* ============ PAGE CONTAINER ============ */
 #content.content{

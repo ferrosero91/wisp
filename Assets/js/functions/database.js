@@ -81,7 +81,7 @@ function remove(idbackup){
     });
 }
 function create_backup(){
-    loading.style.display = "flex";
+    showDatabaseLoading('Generando copia de seguridad de la base de datos...');
     var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
     var ajaxUrl = base_url+'/business/create_backup';
     request.open("POST",ajaxUrl,true);
@@ -90,16 +90,24 @@ function create_backup(){
         if(request.readyState == 4 && request.status == 200){
             var objData = JSON.parse(request.responseText);
             if(objData.status == "success"){
-                alert_msg("success",objData.msg);
-                refresh_table();
+                hideLoading(true);
+                setTimeout(function(){
+                    alert_msg("success",objData.msg);
+                    refresh_table();
+                }, 900);
             }else if(objData.status == "exists"){
-                alert_msg("info",objData.msg);
-                refresh_table();
+                hideLoading();
+                setTimeout(function(){
+                    alert_msg("info",objData.msg);
+                    refresh_table();
+                }, 300);
             }else{
-                alert_msg("error",objData.msg);
+                hideLoading(false);
+                setTimeout(function(){
+                    alert_msg("error",objData.msg);
+                }, 1300);
             }
         }
-        loading.style.display = "none";
         return false;
     }
 }

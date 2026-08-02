@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function(){
 },false);
 function resend(idbill,idemail){
     $('[data-toggle="tooltip"]').tooltip('hide');
-    loading.style.display = "flex";
+    showEmailLoading('Reenviando correo electrónico...');
     var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
     var ajaxUrl = base_url+'/advice/resend/'+idbill+'/'+idemail;
     request.open("GET",ajaxUrl,true);
@@ -47,14 +47,19 @@ function resend(idbill,idemail){
         if(request.readyState == 4 && request.status == 200){
             var objData = JSON.parse(request.responseText);
             if(objData.status == 'success'){
-                alert_msg("success",objData.msg);
-                refresh_table();
+                hideLoading(true);
+                setTimeout(function(){
+                    alert_msg("success",objData.msg);
+                    refresh_table();
+                }, 900);
             }else{
-                alert_msg("error",objData.msg);
-                refresh_table();
+                hideLoading(false);
+                setTimeout(function(){
+                    alert_msg("error",objData.msg);
+                    refresh_table();
+                }, 1300);
             }
         }
-        loading.style.display = "none";
         return false;
     }
 }

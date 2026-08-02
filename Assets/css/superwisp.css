@@ -94,35 +94,7 @@ a:hover{
   text-align: center;
 }
 /* Alertas generales */
-/* Loading */
-#loading{
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background: #d9e0e7;
-    z-index: 9999;
-    display: none;
-}
-.loading-spinner{
-    height: 36px;
-    width: 36px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    margin: -18px 0 0 -18px;
-    border: 2px solid rgba(45,53,60,.85);
-    border-top: 2px solid #fff;
-    -webkit-border-radius: 36px;
-    border-radius: 36px;
-    -webkit-animation: rotation .6s infinite linear;
-    -moz-animation: rotation .6s infinite linear;
-    -ms-animation: rotation .6s infinite linear;
-    -o-animation: rotation .6s infinite linear;
-    animation: rotation .6s infinite linear;
-}
-/* end Loading */
+/* Loading - handled by inline styles */
 /* Widget */
 .widget-stats .stats-link a, .widget.widget-stats .stats-link a{
     background: transparent;

@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function(){
         transactions.onsubmit = function(e){
             e.preventDefault();
             if($('#transactions').parsley().isValid()){
-                loading.style.display = "flex";
+                showDatabaseLoading('Guardando información de instalación...');
                 var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
                 var ajaxUrl = base_url+'/installations/action';
                 var formData = new FormData(transactions);
@@ -95,20 +95,28 @@ document.addEventListener('DOMContentLoaded', function(){
                     if(request.readyState == 4 && request.status == 200){
                         var objData = JSON.parse(request.responseText);
                         if(objData.status == "success"){
-                            $('#modal-action').modal("hide");
-                            transactions.reset();
-                            alert_msg("success",objData.msg);
-                            refresh_table();
+                            hideLoading(true);
+                            setTimeout(function(){
+                                $('#modal-action').modal("hide");
+                                transactions.reset();
+                                alert_msg("success",objData.msg);
+                                refresh_table();
+                            }, 900);
                         }else if(objData.status == "exists"){
-                            $('#modal-action').modal("hide");
-                            transactions.reset();
-                            alert_msg("warning",objData.msg);
-                            refresh_table();
+                            hideLoading();
+                            setTimeout(function(){
+                                $('#modal-action').modal("hide");
+                                transactions.reset();
+                                alert_msg("warning",objData.msg);
+                                refresh_table();
+                            }, 300);
                         }else{
-                            alert_msg("error",objData.msg);
+                            hideLoading(false);
+                            setTimeout(function(){
+                                alert_msg("error",objData.msg);
+                            }, 1300);
                         }
                     }
-                    loading.style.display = "none";
                     return false;
                 }
             }
@@ -317,7 +325,7 @@ function view(idfacility){
 }
 function send_email(idfacility){
     $('[data-toggle="tooltip"]').tooltip('hide');
-    loading.style.display = "flex";
+    showEmailLoading('Enviando información de instalación...');
     var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
     var ajaxUrl = base_url+'/installations/send_email/'+idfacility;
     request.open("GET",ajaxUrl,true);
@@ -326,14 +334,22 @@ function send_email(idfacility){
         if(request.readyState == 4 && request.status == 200){
             var objData = JSON.parse(request.responseText);
             if(objData.status == 'success'){
-                alert_msg("success",objData.msg);
+                hideLoading(true);
+                setTimeout(function(){
+                    alert_msg("success",objData.msg);
+                }, 900);
             }else if(objData.status == 'not_exist'){
-                alert_msg("info",objData.msg);
+                hideLoading();
+                setTimeout(function(){
+                    alert_msg("info",objData.msg);
+                }, 300);
             }else{
-                alert_msg("error",objData.msg);
+                hideLoading(false);
+                setTimeout(function(){
+                    alert_msg("error",objData.msg);
+                }, 1300);
             }
         }
-        loading.style.display = "none";
         return false;
     }
 }

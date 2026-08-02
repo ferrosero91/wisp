@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function(){
             alert_msg("warning","Selecionar una extensión permitida .xls o .xlsx.");
             return false;
           }
-          loading.style.display = "flex";
+          showDatabaseLoading('Importando clientes desde Excel...');
           var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
           var ajaxUrl = base_url+'/customers/import';
           var formData = new FormData(transactions_import);
@@ -128,18 +128,26 @@ document.addEventListener('DOMContentLoaded', function(){
             if(request.readyState == 4 && request.status == 200){
               var objData = JSON.parse(request.responseText);
               if(objData.status == "success"){
-                $('#modal-import').modal("hide");
-                alert_msg("success",objData.msg);
-                refresh_table();
+                hideLoading(true);
+                setTimeout(function(){
+                    $('#modal-import').modal("hide");
+                    alert_msg("success",objData.msg);
+                    refresh_table();
+                }, 900);
               }else if(objData.status == "warning"){
-                $('#modal-import').modal("hide");
-                alert_msg("warning",objData.msg);
-                refresh_table();
+                hideLoading();
+                setTimeout(function(){
+                    $('#modal-import').modal("hide");
+                    alert_msg("warning",objData.msg);
+                    refresh_table();
+                }, 300);
               }else{
-                alert_msg("error",objData.msg);
+                hideLoading(false);
+                setTimeout(function(){
+                    alert_msg("error",objData.msg);
+                }, 1300);
               }
             }
-            loading.style.display = "none";
             return false;
           }
         }
@@ -156,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function(){
           alert_msg("info","No seleccionaste ningún asunto, seleccione uno.");
           return false;
         }
-        loading.style.display = "flex";
+        showDatabaseLoading('Guardando ticket de soporte...');
         tinyMCE.triggerSave();
         var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
         var ajaxUrl = base_url+'/customers/action_ticket';
@@ -167,18 +175,26 @@ document.addEventListener('DOMContentLoaded', function(){
           if(request.readyState == 4 && request.status == 200){
             var objData = JSON.parse(request.responseText);
             if(objData.status == "success"){
-              $('#modal-ticket').modal("hide");
-              transactions_ticket.reset();
-              alert_msg("success",objData.msg);
+              hideLoading(true);
+              setTimeout(function(){
+                  $('#modal-ticket').modal("hide");
+                  transactions_ticket.reset();
+                  alert_msg("success",objData.msg);
+              }, 900);
             }else if(objData.status == "exists"){
-              $('#modal-ticket').modal("hide");
-              transactions_ticket.reset();
-              alert_msg("info",objData.msg);
+              hideLoading();
+              setTimeout(function(){
+                  $('#modal-ticket').modal("hide");
+                  transactions_ticket.reset();
+                  alert_msg("info",objData.msg);
+              }, 300);
             }else{
-              alert_msg("error",objData.msg);
+              hideLoading(false);
+              setTimeout(function(){
+                  alert_msg("error",objData.msg);
+              }, 1300);
             }
           }
-          loading.style.display = "none";
           return false;
         }
       }

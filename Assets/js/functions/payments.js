@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function(){
         transactions_payments.onsubmit = function(e){
             e.preventDefault();
             if($('#transactions_payments').parsley().isValid()){
-                loading.style.display = "flex";
+                showLoading('Registrando pago...');
                 var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
                 var ajaxUrl = base_url+'/payments/modify_payment';
                 var formData = new FormData(transactions_payments);
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function(){
                             alert_msg("error",objData.msg);
                         }
                     }
-                    loading.style.display = "none";
+                    hideLoading();
                     return false;
                 }
             }

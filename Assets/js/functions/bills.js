@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function(){
       transactions_payments.onsubmit = function(e){
           e.preventDefault();
           if($('#transactions_payments').parsley().isValid()){
-              loading.style.display = "flex";
+              showPaymentLoading('Registrando pago en el sistema...');
               var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
               var ajaxUrl = base_url+'/bills/create_payment';
               var formData = new FormData(transactions_payments);
@@ -181,9 +181,12 @@ document.addEventListener('DOMContentLoaded', function(){
                   if(request.readyState == 4 && request.status == 200){
                       var objData = JSON.parse(request.responseText);
                       if(objData.status == "success"){
+                          hideLoading(true);
                           transactions_payments.reset();
                           refresh_table();
-                          $('#modal-payment').modal('hide');
+                          setTimeout(function(){
+                              $('#modal-payment').modal('hide');
+                          }, 900);
                           if(objData.modal){
                             $("#modal-payment").on("hidden.bs.modal", function (){
                               $('#modal-voucher').modal('show');
@@ -222,15 +225,22 @@ document.addEventListener('DOMContentLoaded', function(){
                               document.querySelector('#msg').value = msg;
                             });
                           }else{
-                              alert_msg("success",objData.msg);
+                              setTimeout(function(){
+                                  alert_msg("success",objData.msg);
+                              }, 900);
                           }
                       }else if(objData.status == "warning"){
-                          alert_msg("warning",objData.msg);
+                          hideLoading();
+                          setTimeout(function(){
+                              alert_msg("warning",objData.msg);
+                          }, 300);
                       }else{
-                          alert_msg("error",objData.msg);
+                          hideLoading(false);
+                          setTimeout(function(){
+                              alert_msg("error",objData.msg);
+                          }, 1300);
                       }
                   }
-                  loading.style.display = "none";
                   return false;
               }
           }
@@ -253,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function(){
                     alert_msg("warning","Selecionar una extensión permitida .xls o .xlsx.");
                     return false;
                   }
-                  loading.style.display = "flex";
+                  showLoading('Importando datos, espere por favor...');
                   var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
                   var ajaxUrl = base_url+'/bills/import';
                   var formData = new FormData(transactions_import);
@@ -274,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function(){
                               alert_msg("error",objData.msg);
                           }
                       }
-                      loading.style.display = "none";
+                      hideLoading();
                       return false;
                   }
               }
@@ -296,7 +306,7 @@ document.addEventListener('DOMContentLoaded', function(){
             alert_msg("error","No seleccionaste ningún cliente, seleccione uno.");
             return false;
         }
-        loading.style.display = "flex";
+        showInvoiceLoading('Guardando factura en el sistema...');
         var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
         var ajaxUrl = base_url+'/bills/action_bill';
         var formData = new FormData(transactions_free);
@@ -306,9 +316,12 @@ document.addEventListener('DOMContentLoaded', function(){
             if(request.readyState == 4 && request.status == 200){
                 var objData = JSON.parse(request.responseText);
                 if(objData.status == "success"){
+                    hideLoading(true);
                     transactions_free.reset();
                     refresh_table();
-                    $('#modal-free').modal('hide');
+                    setTimeout(function(){
+                        $('#modal-free').modal('hide');
+                    }, 900);
                     if(objData.modal){
                       $("#modal-free").on("hidden.bs.modal", function (){
                         $('#modal-voucher').modal('show');
@@ -349,13 +362,17 @@ document.addEventListener('DOMContentLoaded', function(){
                         document.querySelector('#msg').value = msg;
                       });
                     }else{
-                        alert_msg("success",objData.msg);
+                        setTimeout(function(){
+                            alert_msg("success",objData.msg);
+                        }, 900);
                     }
                 }else{
-                    alert_msg("error",objData.msg);
+                    hideLoading(false);
+                    setTimeout(function(){
+                        alert_msg("error",objData.msg);
+                    }, 1300);
                 }
             }
-            loading.style.display = "none";
             return false;
         }
     }
@@ -383,7 +400,7 @@ document.addEventListener('DOMContentLoaded', function(){
               return false;
             }
           }
-          loading.style.display = "flex";
+          showLoading('Guardando factura...');
           var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
           var ajaxUrl = base_url+'/bills/action_bill';
           var formData = new FormData(transactions_facser);
@@ -408,7 +425,7 @@ document.addEventListener('DOMContentLoaded', function(){
                       alert_msg("error",objData.msg);
                   }
               }
-              loading.style.display = "none";
+              hideLoading();
               return false;
           }
       }
@@ -1164,7 +1181,7 @@ function cancel(idbill,invoice){
 /* ENVIAR CORREO */
 function send_email(idbill,idclient,type){
     $('[data-toggle="tooltip"]').tooltip('hide');
-    loading.style.display = "flex";
+    showEmailLoading('Enviando factura por correo electrónico...');
     var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
     var ajaxUrl = base_url+'/bills/send_email/'+idbill+'/'+idclient+'/'+type;
     request.open("GET",ajaxUrl,true);
@@ -1173,14 +1190,22 @@ function send_email(idbill,idclient,type){
         if(request.readyState == 4 && request.status == 200){
             var objData = JSON.parse(request.responseText);
             if(objData.status == 'success'){
-                alert_msg("success",objData.msg);
+                hideLoading(true);
+                setTimeout(function(){
+                    alert_msg("success",objData.msg);
+                }, 900);
             }else if(objData.status == 'not_exist'){
-                alert_msg("info",objData.msg);
+                hideLoading();
+                setTimeout(function(){
+                    alert_msg("info",objData.msg);
+                }, 300);
             }else{
-                alert_msg("error",objData.msg);
+                hideLoading(false);
+                setTimeout(function(){
+                    alert_msg("error",objData.msg);
+                }, 1300);
             }
         }
-        loading.style.display = "none";
         return false;
     }
 }
@@ -1392,7 +1417,7 @@ function table_detail_opening(params){
 $('#btn-massive').click(function(){
   let period = document.querySelector("#period").value;
   if(period !== ""){
-    loading.style.display = "flex";
+    showInvoiceLoading('Generando facturación masiva del período...');
     let request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
     let ajaxUrl = base_url+'/bills/mass_registration';
     let formData = new FormData();
@@ -1404,17 +1429,25 @@ $('#btn-massive').click(function(){
       if(request.status == 200){
         let objData = JSON.parse(request.responseText);
         if(objData.status == "success"){
-          $('#modal-massive').modal('hide');
-          alert_msg("success",objData.msg);
+          hideLoading(true);
+          setTimeout(function(){
+              $('#modal-massive').modal('hide');
+              alert_msg("success",objData.msg);
+          }, 900);
           refresh_table();
         }else if(objData.status == "warning"){
-          $('#modal-massive').modal('hide');
-          alert_msg("warning",objData.msg);
+          hideLoading();
+          setTimeout(function(){
+              $('#modal-massive').modal('hide');
+              alert_msg("warning",objData.msg);
+          }, 300);
         }else{
-          alert_msg("error",objData.msg);
+          hideLoading(false);
+          setTimeout(function(){
+              alert_msg("error",objData.msg);
+          }, 1300);
         }
       }
-      loading.style.display = "none";
       return false;
     }
   }else{
@@ -1440,63 +1473,104 @@ function exports(){
 }
 /* ENVIAR FACTURA A DIAN */
 function send_to_dian(idbill){
-    if(!confirm('¿Está seguro de enviar esta factura a la DIAN?')) return;
-    
-    $('[data-toggle="tooltip"]').tooltip('hide');
-    loading.style.display = "flex";
-    
-    var formData = new FormData();
-    formData.append('idbill', idbill);
-    
-    var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-    request.open("POST", base_url+'/electronicinvoice/send_to_dian', true);
-    
-    request.onload = function() {
-        loading.style.display = "none";
-        if (request.status === 200) {
-            try {
-                var objData = JSON.parse(request.responseText);
-                if (objData.status === "success") {
-                    $.confirm({
-                        theme: 'modern',
-                        draggable: false,
-                        closeIcon: true,
-                        animationBounce: 2.5,
-                        type: 'success',
-                        icon: 'far fa-check-circle',
-                        title: 'FACTURA AUTORIZADA',
-                        content: objData.msg + 
-                                 '<br><br><strong>CUFE:</strong><br><code style="word-break:break-all;font-size:11px;">' + (objData.cufe || 'N/A') + '</code>',
-                        buttons: {
-                            ok: {
-                                text: 'Aceptar',
-                                btnClass: 'btn-success'
+    $.confirm({
+        theme: 'modern',
+        draggable: false,
+        closeIcon: true,
+        animationBounce: 2.5,
+        type: 'blue',
+        icon: 'fas fa-paper-plane',
+        title: 'ENVIAR A LA DIAN',
+        content: '<div style="text-align:center;">' +
+            '<div style="font-size:48px;color:#348fe2;margin-bottom:15px;"><i class="fas fa-file-invoice-dollar"></i></div>' +
+            '<p style="font-size:14px;color:#555;margin-bottom:10px;">¿Está seguro de enviar esta factura electrónica a la DIAN?</p>' +
+            '<p style="font-size:12px;color:#888;">Este proceso puede tardar unos segundos mientras se conecta con el servidor de la DIAN.</p>' +
+            '</div>',
+        buttons: {
+            send: {
+                text: '<i class="fas fa-paper-plane mr-1"></i>Enviar a DIAN',
+                btnClass: 'btn-blue',
+                action: function(){
+                    $('[data-toggle="tooltip"]').tooltip('hide');
+                    showInvoiceLoading('Conectando con la DIAN, esto puede tardar unos segundos...');
+                    
+                    var formData = new FormData();
+                    formData.append('idbill', idbill);
+                    
+                    var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+                    request.open("POST", base_url+'/electronicinvoice/send_to_dian', true);
+                    
+                    request.onload = function() {
+                        if (request.status === 200) {
+                            try {
+                                var objData = JSON.parse(request.responseText);
+                                if (objData.status === "success") {
+                                    hideLoading(true);
+                                    setTimeout(function(){
+                                        $.confirm({
+                                            theme: 'modern',
+                                            draggable: false,
+                                            closeIcon: true,
+                                            animationBounce: 2.5,
+                                            type: 'success',
+                                            icon: 'far fa-check-circle',
+                                            title: 'FACTURA AUTORIZADA',
+                                            content: '<div style="text-align:center;">' +
+                                                '<div style="font-size:48px;color:#1aa179;margin-bottom:15px;"><i class="fas fa-check-circle"></i></div>' +
+                                                '<p style="font-size:14px;color:#555;margin-bottom:10px;">' + objData.msg + '</p>' +
+                                                (objData.cufe ? '<div style="background:#f8f9fa;padding:10px;border-radius:8px;margin-top:10px;">' +
+                                                '<strong style="font-size:11px;color:#888;">CUFE:</strong><br>' +
+                                                '<code style="word-break:break-all;font-size:10px;color:#555;">' + objData.cufe + '</code></div>' : '') +
+                                                '</div>',
+                                            buttons: {
+                                                ok: {
+                                                    text: '<i class="fas fa-check mr-1"></i>Aceptar',
+                                                    btnClass: 'btn-success'
+                                                }
+                                            }
+                                        });
+                                    }, 900);
+                                    if(typeof table_bills !== 'undefined'){
+                                        table_bills.ajax.reload();
+                                    }
+                                } else {
+                                    hideLoading(false);
+                                    setTimeout(function(){
+                                        alert_msg("error", objData.msg || "Error desconocido");
+                                    }, 1300);
+                                }
+                            } catch (parseError) {
+                                hideLoading(false);
+                                console.error('Respuesta del servidor:', request.responseText);
+                                setTimeout(function(){
+                                    alert_msg("error", "Error al procesar la respuesta del servidor");
+                                }, 1300);
                             }
+                        } else {
+                            hideLoading(false);
+                            setTimeout(function(){
+                                alert_msg("error", "Error del servidor: " + request.status);
+                            }, 1300);
                         }
-                    });
-                    // Recargar tabla de facturas
-                    if(typeof table_bills !== 'undefined'){
-                        table_bills.ajax.reload();
-                    }
-                } else {
-                    alert_msg("error", objData.msg || "Error desconocido");
+                    };
+                    
+                    request.onerror = function() {
+                        hideLoading(false);
+                        setTimeout(function(){
+                            alert_msg("error", "Error de conexión con el servidor");
+                        }, 1300);
+                    };
+                    
+                    request.send(formData);
                 }
-            } catch (parseError) {
-                console.error('Respuesta del servidor:', request.responseText);
-                alert_msg("error", "Error al procesar la respuesta del servidor");
+            },
+            cancel: {
+                text: '<i class="fas fa-times mr-1"></i>Cancelar',
+                btnClass: 'btn-default'
             }
-        } else {
-            alert_msg("error", "Error del servidor: " + request.status);
         }
-    };
-    
-    request.onerror = function() {
-        loading.style.display = "none";
-        alert_msg("error", "Error de conexión con el servidor");
-    };
-    
-    request.send(formData);
-}
+    });
+} 
 /* VER FACTURA ELECTRONICA */
 function view_electronic_invoice(idbill){
     window.open(base_url+'/electronicinvoice/view_electronic/'+idbill, '_blank');
@@ -1560,7 +1634,7 @@ function show_credit_note_modal(idbill){
 }
 
 function send_credit_note(idbill, reason, desc, notes){
-    loading.style.display = "flex";
+    showInvoiceLoading('Generando nota crédito electrónica...');
     var formData = new FormData();
     formData.append('idbill', idbill);
     formData.append('discrepancy_code', reason);
@@ -1570,26 +1644,39 @@ function send_credit_note(idbill, reason, desc, notes){
     var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
     request.open("POST", base_url+'/electronicinvoice/send_credit_note', true);
     request.onload = function() {
-        loading.style.display = "none";
         if(request.status === 200){
             try {
                 var obj = JSON.parse(request.responseText);
                 if(obj.status === 'success'){
-                    alert_msg("success", obj.msg + (obj.number ? '<br><strong>Número:</strong> ' + obj.number : '') + (obj.cude ? '<br><strong>CUDE:</strong> <code style="word-break:break-all;font-size:11px;">'+obj.cude+'</code>' : ''));
+                    hideLoading(true);
+                    setTimeout(function(){
+                        alert_msg("success", obj.msg + (obj.number ? '<br><strong>Número:</strong> ' + obj.number : '') + (obj.cude ? '<br><strong>CUDE:</strong> <code style="word-break:break-all;font-size:11px;">'+obj.cude+'</code>' : ''));
+                    }, 900);
                     if(typeof table_bills !== 'undefined') table_bills.ajax.reload();
                 } else {
-                    alert_msg("error", obj.msg || "Error al enviar nota crédito");
+                    hideLoading(false);
+                    setTimeout(function(){
+                        alert_msg("error", obj.msg || "Error al enviar nota crédito");
+                    }, 1300);
                 }
             } catch(e) {
-                alert_msg("error", "Error al procesar la respuesta del servidor");
+                hideLoading(false);
+                setTimeout(function(){
+                    alert_msg("error", "Error al procesar la respuesta del servidor");
+                }, 1300);
             }
         } else {
-            alert_msg("error", "Error del servidor: " + request.status);
+            hideLoading(false);
+            setTimeout(function(){
+                alert_msg("error", "Error del servidor: " + request.status);
+            }, 1300);
         }
     };
     request.onerror = function() {
-        loading.style.display = "none";
-        alert_msg("error", "Error de conexión con el servidor");
+        hideLoading(false);
+        setTimeout(function(){
+            alert_msg("error", "Error de conexión con el servidor");
+        }, 1300);
     };
     request.send(formData);
 }
@@ -1642,7 +1729,7 @@ function show_debit_note_modal(idbill){
 }
 
 function send_debit_note(idbill, reason, desc, notes){
-    loading.style.display = "flex";
+    showInvoiceLoading('Generando nota débito electrónica...');
     var formData = new FormData();
     formData.append('idbill', idbill);
     formData.append('discrepancy_code', reason);
@@ -1652,26 +1739,39 @@ function send_debit_note(idbill, reason, desc, notes){
     var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
     request.open("POST", base_url+'/electronicinvoice/send_debit_note', true);
     request.onload = function() {
-        loading.style.display = "none";
         if(request.status === 200){
             try {
                 var obj = JSON.parse(request.responseText);
                 if(obj.status === 'success'){
-                    alert_msg("success", obj.msg + (obj.number ? '<br><strong>Número:</strong> ' + obj.number : '') + (obj.cude ? '<br><strong>CUDE:</strong> <code style="word-break:break-all;font-size:11px;">'+obj.cude+'</code>' : ''));
+                    hideLoading(true);
+                    setTimeout(function(){
+                        alert_msg("success", obj.msg + (obj.number ? '<br><strong>Número:</strong> ' + obj.number : '') + (obj.cude ? '<br><strong>CUDE:</strong> <code style="word-break:break-all;font-size:11px;">'+obj.cude+'</code>' : ''));
+                    }, 900);
                     if(typeof table_bills !== 'undefined') table_bills.ajax.reload();
                 } else {
-                    alert_msg("error", obj.msg || "Error al enviar nota débito");
+                    hideLoading(false);
+                    setTimeout(function(){
+                        alert_msg("error", obj.msg || "Error al enviar nota débito");
+                    }, 1300);
                 }
             } catch(e) {
-                alert_msg("error", "Error al procesar la respuesta del servidor");
+                hideLoading(false);
+                setTimeout(function(){
+                    alert_msg("error", "Error al procesar la respuesta del servidor");
+                }, 1300);
             }
         } else {
-            alert_msg("error", "Error del servidor: " + request.status);
+            hideLoading(false);
+            setTimeout(function(){
+                alert_msg("error", "Error del servidor: " + request.status);
+            }, 1300);
         }
     };
     request.onerror = function() {
-        loading.style.display = "none";
-        alert_msg("error", "Error de conexión con el servidor");
+        hideLoading(false);
+        setTimeout(function(){
+            alert_msg("error", "Error de conexión con el servidor");
+        }, 1300);
     };
     request.send(formData);
 }
