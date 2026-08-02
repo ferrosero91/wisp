@@ -37,3 +37,8 @@ apidian/
 
 # Certificados digitales (sensibles)
 Assets/uploads/certificates/
+
+# Host virtual y configuración local (solo desarrollo)
+setup_virtual_host.bat
+verify_setup.php
+HOST_VIRTUAL_README.md
