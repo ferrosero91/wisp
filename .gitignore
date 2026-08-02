@@ -15,6 +15,9 @@ error_log.php
 *.log
 Logs/
 
+# Cache
+cache/
+
 # Dependencias de vendor (se instalan con composer)
 Libraries/dompdf/vendor/
 Libraries/resize/vendor/

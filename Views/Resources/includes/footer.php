@@ -112,33 +112,35 @@
     </script>
     <!-- ================== INICIO RUTA  ============== -->
     <!-- ================== INICIO ARCHIVOS JS ======== -->
+    <!-- Scripts críticos (sin defer) -->
     <script src="<?= base_style() ?>/js/app.min.js"></script>
-    <script src="<?= base_style() ?>/js/moment.min.js"></script>
-    <script src="<?= base_style() ?>/js/functions.js?v=2026080216"></script>
-    <script src="<?= base_style() ?>/js/utils.min.js"></script>
-    <script src="<?= base_style() ?>/js/initial.min.js"></script>
-    <script src="<?= base_style() ?>/js/theme/default.min.js"></script>
-    <script src="<?= base_style() ?>/js/jquery-confirm.min.js"></script>
-    <script src="<?= base_style() ?>/js/jquery.bootstrap-touchspin.min.js"></script>
-    <script src="<?= base_style() ?>/js/datatables.min.js"></script>
-    <script src="<?= base_style() ?>/bookstores/jszip/jszip.min.js"></script>
-    <script src="<?= base_style() ?>/bookstores/pdfmake/pdfmake.min.js"></script>
-    <script src="<?= base_style() ?>/bookstores/pdfmake/vfs_fonts.js"></script>
-    <script src="<?= base_style() ?>/bookstores/tinymce/tinymce.min.js"></script>
-    <script src="<?= base_style() ?>/bookstores/select2/js/select2.min.js"></script>
-    <script src="<?= base_style() ?>/bookstores/parsleyjs/parsley.js"></script>
-    <script src="<?= base_style() ?>/bookstores/smartwizard/js/jquery.smartWizard.js"></script>
-    <script src="<?= base_style() ?>/bookstores/gritter/js/jquery.gritter.min.js"></script>
-    <script src="<?= base_style() ?>/bookstores/jquery.maskedinput/jquery.maskedinput.js"></script>
-    <script src="<?= base_style() ?>/bookstores/chartjs/js/chart.min.js"></script>
-    <script src="<?= base_style() ?>/bookstores/lightbox/js/lightbox.min.js"></script>
-    <script src="<?= base_style() ?>/bookstores/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
-    <script src="<?= base_style() ?>/bookstores/axios/axios.min.js"></script>
+    <!-- Scripts con defer para carga asíncrona -->
+    <script defer src="<?= base_style() ?>/js/moment.min.js"></script>
+    <script defer src="<?= base_style() ?>/js/functions.js?v=2026080217"></script>
+    <script defer src="<?= base_style() ?>/js/utils.min.js"></script>
+    <script defer src="<?= base_style() ?>/js/initial.min.js"></script>
+    <script defer src="<?= base_style() ?>/js/theme/default.min.js"></script>
+    <script defer src="<?= base_style() ?>/js/jquery-confirm.min.js"></script>
+    <script defer src="<?= base_style() ?>/js/jquery.bootstrap-touchspin.min.js"></script>
+    <script defer src="<?= base_style() ?>/js/datatables.min.js"></script>
+    <script defer src="<?= base_style() ?>/bookstores/jszip/jszip.min.js"></script>
+    <script defer src="<?= base_style() ?>/bookstores/pdfmake/pdfmake.min.js"></script>
+    <script defer src="<?= base_style() ?>/bookstores/pdfmake/vfs_fonts.js"></script>
+    <script defer src="<?= base_style() ?>/bookstores/tinymce/tinymce.min.js"></script>
+    <script defer src="<?= base_style() ?>/bookstores/select2/js/select2.min.js"></script>
+    <script defer src="<?= base_style() ?>/bookstores/parsleyjs/parsley.js"></script>
+    <script defer src="<?= base_style() ?>/bookstores/smartwizard/js/jquery.smartWizard.js"></script>
+    <script defer src="<?= base_style() ?>/bookstores/gritter/js/jquery.gritter.min.js"></script>
+    <script defer src="<?= base_style() ?>/bookstores/jquery.maskedinput/jquery.maskedinput.js"></script>
+    <script defer src="<?= base_style() ?>/bookstores/chartjs/js/chart.min.js"></script>
+    <script defer src="<?= base_style() ?>/bookstores/lightbox/js/lightbox.min.js"></script>
+    <script defer src="<?= base_style() ?>/bookstores/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+    <script defer src="<?= base_style() ?>/bookstores/axios/axios.min.js"></script>
     <!-- ================== FIN ARCHIVOS JS =========== -->
     <!-- ================== FIN API GOOGLE MAPS JS ================== -->
     <?php if(isset($data['page_functions_js'])){ ?>
     <!-- ================== INICIO FUNCION JS ============ -->
-    <script src="<?= base_style() ?>/js/functions/<?= $data['page_functions_js']; ?>?v=2026080216"></script>
+    <script defer src="<?= base_style() ?>/js/functions/<?= $data['page_functions_js']; ?>?v=2026080217"></script>
     <!-- ================== FIN FUNCION JS =============== -->
      <?php } ?>
     </body>

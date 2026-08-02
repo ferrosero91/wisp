@@ -4,3 +4,6 @@
             require_once("Libraries/".'Core/'.$class.'.php');
         }
     });
+    
+    // Instancia global de caché
+    $GLOBALS['cache'] = new Cache(300); // 5 minutos TTL por defecto
