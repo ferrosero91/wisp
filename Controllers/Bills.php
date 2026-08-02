@@ -1317,66 +1317,27 @@
                     $dateIssue = DateTime::createFromFormat('m/Y', $_POST['period']);
                     $period = $dateIssue->format('m-Y');
                     $period_currect = date("m-Y");
-                    $total_bill = 0;
+                    
                     if($period_currect !== $period){
-                        $total_bill = 0;
+                        $response = array('status' => 'warning', 'msg' => 'Solo se pueden facturar servicios del mes actual.');
                     }else{
                         $period = explode("-",$period);
                         $month = intval($period[0]);
                         $year = intval($period[1]);
-                        $business = intval($_SESSION['businessData']['id']);
                         $user = intval($_SESSION['idUser']);
                         $voucher = 1;
                         $serie = 1;
-                        $data = $this->model->detail_opening($month,$year);
-                        for($i=0; $i < count($data); $i++){
-                            $idclient = $data[$i]['clientid'];
-                            $issue = date("Y-m-d");
-                            $payday = intval($data[$i]['payday']);
-                            $last_day = date("t", mktime(0, 0, 0, $month, 1, $year));
-                            if($payday < 1 || $payday > $last_day){
-                                $payday = $last_day;
-                            }
-                            $payday = str_pad($payday, 2, "0", STR_PAD_LEFT);
-                            $current = date("Y-m-".$payday);
-                            $expiration = date("Y-m-d",strtotime($current." + 1 month"));
-                            $months = months();
-          					        $month_letter = $months[date('n',strtotime($current))-1];
-                            // Registrar factura
-                            $row = $this->model->returnCode();
-                            if($row == 0){
-                                $code = "V00001";
-                            }else{
-                                $max = $this->model->generateCode();
-                                $code = "V".substr((substr($max,1)+100001),1);
-                            }
-                            $num_corre = $this->model->returnCorrelative($voucher,$serie);
-                            if(empty($num_corre)){
-                                $correlative = 1;
-                            }else{
-                                $correlative =  $this->model->returnUsed($voucher,$serie);
-                            }
-                            $total = $this->model->service_amount($data[$i]['id']);
-
-                            $request = $this->model->mass_registration($user,$idclient,$voucher,$serie,$code,$correlative,$issue,$expiration,$current,$total,0,$total,2,2,"",2);
-                            if($request > 0){
-                                $idbill = $this->model->returnBill();
-                                $this->model->modify_available($voucher,$serie);
-                                $services = $this->model->select_detail_contract($data[$i]['id']);
-                                for($d=0; $d < count($services); $d++){
-                                    $description_service = "SERVICIO DE ".$services[$d]['service'].",MES DE ".strtoupper($month_letter);
-                                    $this->model->create_datail($idbill,2,$services[$d]['serviceid'],$description_service,1,$services[$d]['price'],$services[$d]['price']);
-                                }
-                            }
-                            $total_bill = $total_bill + $request;
+                        $issue = date("Y-m-d");
+                        
+                        // Obtener clientes pendientes de facturar
+                        $clients = $this->model->detail_opening($month,$year);
+                        
+                        if(empty($clients)){
+                            $response = array('status' => 'warning', 'msg' => 'No hay clientes pendientes de facturar este mes.');
+                        }else{
+                            // Ejecutar facturación masiva con transacciones
+                            $response = $this->model->execute_mass_registration($user, $voucher, $serie, $issue, $clients, $month, $year);
                         }
-                    }
-                    if($total_bill >= 1){
-                        $response = array('status' => 'success', 'msg' => 'Se facturo los servicios de este mes.');
-                    }else if($total_bill == 0){
-                        $response = array('status' => 'warning', 'msg' => 'Las facturas de este mes ya fueron emitidas.');
-                    }else{
-                        $response = array("status" => 'error', "msg" => 'No se pudo realizar esta operación, intentelo nuevamente.');
                     }
                 }
                 echo json_encode($response,JSON_UNESCAPED_UNICODE);

@@ -303,8 +303,8 @@
 				$sql = "SELECT dc.id,dc.contractid,dc.serviceid,dc.price,s.service
 				FROM detail_contracts dc
 				JOIN services s ON dc.serviceid = s.id
-				WHERE dc.contractid = $this->intContract";
-				$answer = $this->select_all($sql);
+				WHERE dc.contractid = ?";
+				$answer = $this->select_all($sql, array($this->intContract));
 				return $answer;
 		}
 		public function select_client(int $client){
@@ -783,9 +783,9 @@
 				return $asnwer;
 		}
 		public function service_amount(int $contract){
-			$sql = "SELECT COALESCE(SUM(price),0) as total FROM detail_contracts WHERE contractid = $contract";
-			$answer = $this->select($sql);
-					$total =   $answer['total'];
+			$sql = "SELECT COALESCE(SUM(price),0) as total FROM detail_contracts WHERE contractid = ?";
+			$answer = $this->select($sql, array($contract));
+			$total = $answer['total'];
 			return $total;
 		}
 		public function check_electronic_invoice(int $billid){
@@ -799,5 +799,119 @@
 			$data = array($billid);
 			$answer = $this->select($sql, $data);
 			return $answer;
+		}
+		
+		/* ============================================================
+		 * FACTURACIÓN MASIVA CON TRANSACCIONES
+		 * ============================================================ */
+		
+		/**
+		 * Ejecuta la facturación masiva de servicios con transacciones
+		 * Si algún cliente falla, se revierten todos los cambios
+		 */
+		public function execute_mass_registration(int $user, int $voucher, int $serie, string $issue, array $clients, int $month, int $year): array {
+			$total_bill = 0;
+			$processed = 0;
+			$errors = [];
+			
+			try {
+				$this->beginTransaction();
+				
+				foreach ($clients as $client_data) {
+					$idclient = intval($client_data['clientid']);
+					$contract_id = intval($client_data['id']);
+					$payday = intval($client_data['payday']);
+					
+					// Calcular fecha de vencimiento
+					$last_day = date("t", mktime(0, 0, 0, $month, 1, $year));
+					if ($payday < 1 || $payday > $last_day) {
+						$payday = $last_day;
+					}
+					$payday = str_pad($payday, 2, "0", STR_PAD_LEFT);
+					$current = date("Y-m-" . $payday);
+					$expiration = date("Y-m-d", strtotime($current . " + 1 month"));
+					$months = months();
+					$month_letter = $months[date('n', strtotime($current)) - 1];
+					
+					// Generar código interno
+					$row = $this->returnCode();
+					if ($row == 0) {
+						$code = "V00001";
+					} else {
+						$max = $this->generateCode();
+						$code = "V" . substr((substr($max, 1) + 100001), 1);
+					}
+					
+					// Obtener correlativo
+					$num_corre = $this->returnCorrelative($voucher, $serie);
+					if (empty($num_corre)) {
+						$correlative = 1;
+					} else {
+						$correlative = $this->returnUsed($voucher, $serie);
+					}
+					
+					// Calcular monto del servicio
+					$total = $this->service_amount($contract_id);
+					
+					// Verificar si ya existe factura para este período
+					$existing = $this->check_existing_bill($idclient, $month, $year);
+					if ($existing) {
+						continue; // Saltar este cliente
+					}
+					
+					// Registrar factura
+					$bill_query = "INSERT INTO bills(userid,clientid,voucherid,serieid,internal_code,correlative,date_issue,expiration_date,billed_month,subtotal,discount,total,remaining_amount,type,sales_method,observation,state) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+					$bill_data = array($user, $idclient, $voucher, $serie, $code, $correlative, $issue, $expiration, $current, $total, 0, $total, $total, 2, 2, "", 2);
+					$idbill = $this->insert($bill_query, $bill_data);
+					
+					if (!$idbill) {
+						$this->rollback();
+						return ['status' => 'error', 'msg' => 'Error al crear factura para cliente ID: ' . $idclient];
+					}
+					
+					// Actualizar correlativo disponible
+					$this->modify_available($voucher, $serie);
+					
+					// Registrar detalle de servicios
+					$services = $this->select_detail_contract($contract_id);
+					foreach ($services as $service) {
+						$description_service = "SERVICIO DE " . $service['service'] . ",MES DE " . strtoupper($month_letter);
+						$detail_query = "INSERT INTO detail_bills(billid,type,serproid,description,quantity,price,total) VALUES(?,?,?,?,?,?,?)";
+						$detail_data = array($idbill, 2, $service['serviceid'], $description_service, 1, $service['price'], $service['price']);
+						$detail_insert = $this->insert($detail_query, $detail_data);
+						
+						if (!$detail_insert) {
+							$this->rollback();
+							return ['status' => 'error', 'msg' => 'Error al crear detalle de factura para cliente ID: ' . $idclient];
+						}
+					}
+					
+					$total_bill++;
+					$processed++;
+				}
+				
+				// Todo exitoso - confirmar transacción
+				$this->commit();
+				
+				if ($total_bill >= 1) {
+					return ['status' => 'success', 'msg' => 'Se facturaron ' . $total_bill . ' servicios del mes correctamente.', 'total' => $total_bill];
+				} else {
+					return ['status' => 'warning', 'msg' => 'Las facturas de este mes ya fueron emitidas.'];
+				}
+				
+			} catch (\Exception $e) {
+				$this->rollback();
+				return ['status' => 'error', 'msg' => 'Error en el proceso: ' . $e->getMessage()];
+			}
+		}
+		
+		/**
+		 * Verifica si ya existe una factura para el cliente en el período
+		 */
+		public function check_existing_bill(int $clientid, int $month, int $year): bool {
+			$sql = "SELECT COUNT(*) as total FROM bills WHERE clientid = ? AND MONTH(billed_month) = ? AND YEAR(billed_month) = ? AND state != 4 AND type = 2";
+			$data = array($clientid, $month, $year);
+			$answer = $this->select($sql, $data);
+			return intval($answer['total']) > 0;
 		}
 	}
