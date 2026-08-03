@@ -21,6 +21,9 @@ RewriteRule ^migrate_passwords\.php$ - [F,L]
 # Compresión Gzip
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json application/x-javascript application/xml application/xml+rss
+  # Excluir archivos que ya están comprimidos
+  SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png|webp|ico|svg)$ no-gzip dont-vary
+  SetEnvIfNoCase Request_URI \.(?:t?gz|zip|bz2|rar|7z)$ no-gzip dont-vary
 </IfModule>
 
 # Caché de assets estáticos
@@ -49,6 +52,9 @@ RewriteRule ^migrate_passwords\.php$ - [F,L]
   <FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico)$">
     Header set Cache-Control "public, max-age=31536000"
   </FilesMatch>
+  # Preload hints
+  Header set Link "</css/default/app.min.css>; rel=preload; as=style"
+  Header set Link "</js/app.min.js>; rel=preload; as=script"
 </IfModule>
 
 # Cabeceras de seguridad
@@ -60,8 +66,8 @@ RewriteRule ^migrate_passwords\.php$ - [F,L]
   Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
   Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
   
-  # Content Security Policy
-  Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'"
+  # Content Security Policy (ajustado para el sistema)
+  Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://maps.googleapis.com https://api.qrserver.com"
   
   # Cache control para archivos sensibles
   <FilesMatch "\.(php|html|htm)$">
@@ -69,7 +75,32 @@ RewriteRule ^migrate_passwords\.php$ - [F,L]
     Header set Pragma "no-cache"
     Header set Expires "0"
   </FilesMatch>
+  
+  # Protección contra clickjacking
+  Header always append X-Frame-Options SAMEORIGIN
+  
+  # Prevenir MIME sniffing
+  Header set X-Content-Type-Options "nosniff"
 </IfModule>
+
+# ===== PROTECCIONES ADICIONALES =====
+# Bloquear acceso a archivos de backup
+<FilesMatch "\.(bak|backup|old|orig|save|swp|tmp)$">
+  Require all denied
+</FilesMatch>
+
+# Bloquear acceso a archivos de configuración
+<FilesMatch "\.(ini|conf|cfg|config)$">
+  Require all denied
+</FilesMatch>
+
+# Bloquear acceso a archivos de log
+<FilesMatch "\.(log|logs)$">
+  Require all denied
+</FilesMatch>
+
+# Limitar tamaño de subida (10MB)
+LimitRequestBody 10485760
 
 # ===== REESCRITURA =====
 RewriteEngine on
@@ -86,3 +117,14 @@ RewriteRule ^(.*)$ https://internet.mipaginaweb.pe/$1 [R=301,L,NE]
 
 # Bloquear directorios sin index
 Options -Indexes
+
+# Deshabilitar server signature
+ServerSignature Off
+
+# Ocultar versión de PHP
+<IfModule mod_php7.c>
+  php_flag expose_php Off
+</IfModule>
+<IfModule mod_php.c>
+  php_flag expose_php Off
+</IfModule>

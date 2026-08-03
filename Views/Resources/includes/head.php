@@ -45,7 +45,8 @@
         <link rel="stylesheet" href="<?= base_style() ?>/bookstores/smartwizard/css/smart_wizard.css">
         <link rel="stylesheet" href="<?= base_style() ?>/bookstores/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css">
         <link rel="stylesheet" href="<?= base_style() ?>/bookstores/lightbox/css/lightbox.css">
-        <link rel="stylesheet" href="<?= base_style() ?>/css/modern.css?v=2026080217">
+        <link rel="stylesheet" href="<?= base_style() ?>/css/modern.css?v=2026080222">
+        <link rel="stylesheet" href="<?= base_style() ?>/css/ui-enhancements.css?v=2026080222">
         <!-- ================== FIN ARCHIVOS CSS ============== -->
         <!-- ================== INICIO TITULO ================= -->
         <title><?= $data['page_name'] ?></title>

@@ -1,0 +1,759 @@
+/* =====================================================
+   INTERNET SYSTEM - UI ENHANCEMENTS
+   Mejoras visuales, animaciones y UX moderna
+   ===================================================== */
+
+/* ============ ANIMACIONES BASE ============ */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInLeft {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes ripple {
+    0% { transform: scale(0); opacity: 0.5; }
+    100% { transform: scale(4); opacity: 0; }
+}
+
+/* ============ APLICACIÓN DE ANIMACIONES ============ */
+.page-container {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.panel {
+    animation: fadeInUp 0.4s ease-out;
+    animation-fill-mode: both;
+}
+
+.panel:nth-child(2) { animation-delay: 0.1s; }
+.panel:nth-child(3) { animation-delay: 0.2s; }
+.panel:nth-child(4) { animation-delay: 0.3s; }
+
+.widget.widget-stats {
+    animation: fadeInUp 0.5s ease-out;
+    animation-fill-mode: both;
+}
+
+.widget.widget-stats:nth-child(1) { animation-delay: 0.1s; }
+.widget.widget-stats:nth-child(2) { animation-delay: 0.2s; }
+.widget.widget-stats:nth-child(3) { animation-delay: 0.3s; }
+.widget.widget-stats:nth-child(4) { animation-delay: 0.4s; }
+
+/* ============ MEJORAS DE PANELES ============ */
+.panel {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--m-border);
+    box-shadow: var(--m-shadow-panel);
+}
+
+.panel:hover {
+    box-shadow: var(--m-shadow-hover);
+    transform: translateY(-2px);
+}
+
+.panel-heading {
+    position: relative;
+    overflow: hidden;
+}
+
+.panel-heading::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--m-primary), #14b58c);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+    transform-origin: left;
+}
+
+.panel:hover .panel-heading::after {
+    transform: scaleX(1);
+}
+
+/* ============ MEJORAS DE TABLAS ============ */
+.table {
+    transition: all 0.3s ease;
+}
+
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(14, 159, 159, 0.04);
+    transform: scale(1.002);
+}
+
+.table thead th {
+    position: relative;
+    overflow: hidden;
+}
+
+.table thead th::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--m-primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.table thead th:hover::after {
+    transform: scaleX(1);
+}
+
+/* DataTable pagination */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    transition: all 0.2s ease;
+    border-radius: 8px !important;
+    margin: 0 2px;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: var(--m-primary) !important;
+    border-color: var(--m-primary) !important;
+    color: #fff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(14, 159, 159, 0.3);
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: var(--m-primary) !important;
+    border-color: var(--m-primary) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(14, 159, 159, 0.3);
+}
+
+/* ============ MEJORAS DE BOTONES ============ */
+.btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+}
+
+.btn:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Efecto ripple en botones */
+.btn-ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-ripple .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    animation: ripple 0.6s ease-out;
+    pointer-events: none;
+}
+
+/* ============ MEJORAS DE FORMULARIOS ============ */
+.form-control {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid #e0e7ef;
+    background: #f8fafc;
+}
+
+.form-control:focus {
+    border-color: var(--m-primary);
+    box-shadow: 0 0 0 4px var(--m-primary-soft);
+    background: #fff;
+    transform: translateY(-1px);
+}
+
+.form-control:hover:not(:focus) {
+    border-color: #c3cdd9;
+    background: #fff;
+}
+
+/* Labels flotantes */
+.form-group {
+    position: relative;
+}
+
+.form-group .field-icon {
+    transition: all 0.3s ease;
+}
+
+.form-group .form-control:focus ~ .field-icon {
+    color: var(--m-primary);
+    transform: scale(1.1);
+}
+
+/* Select2 mejorado */
+.select2-container--default .select2-selection--single {
+    transition: all 0.3s ease;
+    border: 2px solid #e0e7ef;
+    border-radius: 10px;
+}
+
+.select2-container--default.select2-container--focus .select2-selection--single,
+.select2-container--default .select2-selection--single:focus {
+    border-color: var(--m-primary);
+    box-shadow: 0 0 0 4px var(--m-primary-soft);
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background: var(--m-primary);
+    transition: background 0.2s ease;
+}
+
+/* ============ MEJORAS DE MODALES ============ */
+.modal-content {
+    animation: fadeInUp 0.3s ease-out;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #f8f9fa, #fff);
+    border-bottom: 1px solid var(--m-border);
+    padding: 20px 24px;
+}
+
+.modal-title {
+    font-weight: 700;
+    color: var(--m-text);
+    font-size: 18px;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-footer {
+    background: #f8f9fa;
+    border-top: 1px solid var(--m-border);
+    padding: 16px 24px;
+}
+
+/* Modal backdrop mejorado */
+.modal-backdrop {
+    background: rgba(15, 28, 46, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.modal-backdrop.show {
+    opacity: 1;
+    animation: fadeIn 0.2s ease;
+}
+
+/* ============ MEJORAS DE WIDGETS ============ */
+.widget.widget-stats {
+    position: relative;
+    overflow: hidden;
+    border: none;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.widget.widget-stats::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+    pointer-events: none;
+}
+
+.widget.widget-stats:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.widget.widget-stats .stats-icon {
+    transition: all 0.4s ease;
+}
+
+.widget.widget-stats:hover .stats-icon {
+    transform: scale(1.1) rotate(5deg);
+    opacity: 0.25;
+}
+
+.widget.widget-stats .stats-info h4 {
+    transition: all 0.3s ease;
+}
+
+.widget.widget-stats:hover .stats-info h4 {
+    transform: translateX(5px);
+}
+
+/* ============ MEJORAS DE SIDEBAR ============ */
+.sidebar .nav > li > a {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.sidebar .nav > li > a::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--m-primary);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+    border-radius: 0 3px 3px 0;
+}
+
+.sidebar .nav > li > a:hover::before,
+.sidebar .nav > li.active > a::before {
+    transform: scaleY(1);
+}
+
+.sidebar .nav > li > a:hover {
+    transform: translateX(5px);
+}
+
+.sidebar .nav > li.active > a {
+    transform: translateX(0);
+    box-shadow: 0 4px 15px rgba(14, 159, 159, 0.3);
+}
+
+/* ============ MEJORAS DE NOTIFICACIONES ============ */
+.gritter-item-wrapper {
+    animation: slideInRight 0.4s ease-out;
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.gritter-item {
+    border-radius: 12px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+    transition: all 0.3s ease;
+}
+
+.gritter-item:hover {
+    transform: translateX(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* ============ MEJORAS DE CARDS/BOXES ============ */
+.box {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.box:hover {
+    box-shadow: var(--m-shadow-hover);
+}
+
+.box-header {
+    transition: all 0.3s ease;
+}
+
+.box-header:hover {
+    background: rgba(14, 159, 159, 0.05);
+}
+
+/* ============ MEJORAS DE DROPDOWNS ============ */
+.dropdown-menu {
+    animation: fadeInDown 0.2s ease-out;
+    border: 1px solid var(--m-border);
+    box-shadow: var(--m-shadow-hover);
+    border-radius: 12px;
+    padding: 8px;
+}
+
+.dropdown-item {
+    transition: all 0.2s ease;
+    border-radius: 8px;
+    padding: 10px 16px;
+}
+
+.dropdown-item:hover {
+    background: var(--m-primary-soft);
+    color: var(--m-primary-dark);
+    transform: translateX(5px);
+}
+
+/* ============ MEJORAS DE TOOLTIPS ============ */
+.tooltip {
+    animation: fadeIn 0.2s ease;
+}
+
+.tooltip-inner {
+    background: var(--m-text);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tooltip-arrow::before {
+    border-top-color: var(--m-text);
+}
+
+/* ============ MEJORAS DE BADGES ============ */
+.badge, .label {
+    transition: all 0.2s ease;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.badge:hover, .label:hover {
+    transform: scale(1.05);
+}
+
+/* ============ MEJORAS DE PROGRESS BARS ============ */
+.progress {
+    border-radius: 10px;
+    overflow: hidden;
+    background: #e9ecef;
+    height: 10px;
+}
+
+.progress-bar {
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(90deg, var(--m-primary), #14b58c);
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    animation: shimmer 2s infinite;
+    background-size: 200% 100%;
+}
+
+/* ============ MEJORAS DE ACCORDIONS ============ */
+.accordion .card {
+    transition: all 0.3s ease;
+    border-radius: 12px !important;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.accordion .card:hover {
+    box-shadow: var(--m-shadow);
+}
+
+.accordion .card-header {
+    transition: all 0.3s ease;
+}
+
+.accordion .card-header:hover {
+    background: rgba(14, 159, 159, 0.05);
+}
+
+/* ============ MEJORAS DE TABS ============ */
+.nav-tabs .nav-link {
+    transition: all 0.3s ease;
+    border-radius: 10px 10px 0 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-tabs .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--m-primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.nav-tabs .nav-link.active::after,
+.nav-tabs .nav-link:hover::after {
+    transform: scaleX(1);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--m-primary);
+    font-weight: 600;
+}
+
+/* ============ MEJORAS DE ALERTAS ============ */
+.alert {
+    border: none;
+    border-radius: 12px;
+    padding: 16px 20px;
+    animation: fadeInDown 0.3s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.alert::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: currentColor;
+    opacity: 0.5;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, rgba(26, 161, 121, 0.1), rgba(20, 181, 140, 0.05));
+    color: #1aa179;
+    border-left: 4px solid #1aa179;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, rgba(255, 91, 87, 0.1), rgba(255, 114, 105, 0.05));
+    color: #ff5b57;
+    border-left: 4px solid #ff5b57;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, rgba(245, 156, 26, 0.1), rgba(248, 181, 0, 0.05));
+    color: #f59c1a;
+    border-left: 4px solid #f59c1a;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, rgba(52, 143, 226, 0.1), rgba(73, 182, 214, 0.05));
+    color: #348fe2;
+    border-left: 4px solid #348fe2;
+}
+
+/* ============ MEJORAS DE SCROLLBAR ============ */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #c3cdd9, #a0aec0);
+    border-radius: 10px;
+    border: 2px solid #f1f1f1;
+    transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #a0aec0, #7a8ba0);
+}
+
+/* ============ MEJORAS DE CHECKBOXES Y RADIOS ============ */
+.custom-control-input:checked ~ .custom-control-label::before {
+    background-color: var(--m-primary);
+    border-color: var(--m-primary);
+    box-shadow: 0 0 0 3px var(--m-primary-soft);
+    transition: all 0.2s ease;
+}
+
+.custom-control-input:focus ~ .custom-control-label::before {
+    box-shadow: 0 0 0 3px var(--m-primary-soft);
+}
+
+/* ============ EFECTO SKELETON LOADING ============ */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+}
+
+.skeleton-text {
+    height: 14px;
+    margin-bottom: 8px;
+}
+
+.skeleton-title {
+    height: 20px;
+    width: 60%;
+    margin-bottom: 12px;
+}
+
+.skeleton-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.skeleton-button {
+    height: 40px;
+    width: 120px;
+    border-radius: 8px;
+}
+
+/* ============ EFECTO GLASSMORPHISM ============ */
+.glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.glass-dark {
+    background: rgba(15, 28, 46, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* ============ EFECTO HOVER CARDS ============ */
+.hover-card {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* ============ EFECTO GRADIENT TEXT ============ */
+.gradient-text {
+    background: linear-gradient(135deg, var(--m-primary), #14b58c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ============ MEJORAS DE PRINT ============ */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .panel {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+    
+    body {
+        background: #fff !important;
+    }
+}
+
+/* ============ RESPONSIVE MEJORAS ============ */
+@media (max-width: 768px) {
+    .panel {
+        animation: fadeIn 0.3s ease-out;
+    }
+    
+    .widget.widget-stats {
+        margin-bottom: 16px;
+    }
+    
+    .modal-content {
+        border-radius: 16px 16px 0 0;
+        margin-top: auto;
+    }
+    
+    .modal {
+        padding: 0 !important;
+    }
+    
+    .modal-dialog {
+        margin: 0;
+        max-width: 100%;
+    }
+}
+
+/* ============ DARK MODE PREPARATION ============ */
+@media (prefers-color-scheme: dark) {
+    /* Preparado para futura implementación de dark mode */
+    /* :root {
+        --m-body-bg: #1a1a2e;
+        --m-text: #e0e0e0;
+        --m-border: #2d2d44;
+    } */
+}

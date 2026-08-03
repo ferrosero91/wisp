@@ -136,14 +136,23 @@ function deleteResolution(id){
                         if(request.readyState == 4 && request.status == 200){
                             var objData = JSON.parse(request.responseText);
                             if(objData.status == 'success'){
-                alert_msg("success", objData.msg);
-                loadResolutions();
-            }else{
-                alert_msg("error", objData.msg);
+                                alert_msg("success", objData.msg);
+                                loadResolutions();
+                            }else{
+                                alert_msg("error", objData.msg);
+                            }
+                        }
+                    }
+                }
+            },
+            cancel: {
+                text: '<i class="fas fa-times mr-1"></i>Cancelar',
+                btnClass: 'btn-default'
             }
         }
-    }
+    });
 }
+
 function loadResolutions(){
     var container = document.getElementById('list-resolutions');
     if(!container) return;
@@ -769,12 +778,6 @@ document.addEventListener('DOMContentLoaded',function(){
                     }
                 }
             });
-            return false;
-                console.error('Error de conexión');
-                alert_msg("error", "Error de conexión con el servidor");
-            };
-            
-            request.send(formData);
             return false;
         }
     }

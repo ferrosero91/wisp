@@ -5,6 +5,8 @@
 
 # Copias de seguridad y dumps
 *.sql
+!database_dian_tables.sql
+!database_electronic_modules.sql
 *.zip
 *.rar
 *.bak
@@ -42,3 +44,4 @@ Assets/uploads/certificates/
 setup_virtual_host.bat
 verify_setup.php
 HOST_VIRTUAL_README.md
+migrate_electronic_resolutions.php

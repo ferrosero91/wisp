@@ -19,7 +19,8 @@ class ElectronicReports extends Controllers {
             header('Location: ' . base_url() . '/login');
             die();
         }
-        consent_permission(BILLS);
+        // Usar permisos del módulo de Facturación Electrónica
+        consent_permission(ELECTRONIC_INVOICE);
     }
     
     /**

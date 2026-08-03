@@ -166,10 +166,8 @@
                     <li class="<?php if($current[0]=="payments" && $current[1]=="statistics") echo"active"; ?>"><a href="<?= base_url() ?>/payments/statistics">Estadisticas</a></li>
                     <?php } ?>
                     <?php } ?>
-                    <?php if(!empty($_SESSION['permits'][BILLS]['v'])){ ?>
-                    <?php if($_SESSION['userData']['profileid'] == ADMINISTRATOR){ ?>
+                    <?php if(!empty($_SESSION['permits'][ELECTRONIC_INVOICE]['v'])){ ?>
                     <li class="<?php if($current[0]=="electronicreports") echo"active"; ?>"><a href="<?= base_url() ?>/electronicreports">Facturación Electrónica</a></li>
-                    <?php } ?>
                     <?php } ?>
                 </ul>
             </li>

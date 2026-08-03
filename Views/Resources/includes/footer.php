@@ -136,11 +136,12 @@
     <script defer src="<?= base_style() ?>/bookstores/lightbox/js/lightbox.min.js"></script>
     <script defer src="<?= base_style() ?>/bookstores/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
     <script defer src="<?= base_style() ?>/bookstores/axios/axios.min.js"></script>
+    <script defer src="<?= base_style() ?>/js/ui-enhancements.js?v=2026080221"></script>
     <!-- ================== FIN ARCHIVOS JS =========== -->
     <!-- ================== FIN API GOOGLE MAPS JS ================== -->
     <?php if(isset($data['page_functions_js'])){ ?>
     <!-- ================== INICIO FUNCION JS ============ -->
-    <script defer src="<?= base_style() ?>/js/functions/<?= $data['page_functions_js']; ?>?v=2026080220"></script>
+    <script defer src="<?= base_style() ?>/js/functions/<?= $data['page_functions_js']; ?>?v=2026080224"></script>
     <!-- ================== FIN FUNCION JS =============== -->
      <?php } ?>
     </body>

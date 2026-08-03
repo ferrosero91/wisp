@@ -82,6 +82,8 @@ define('RUNWAY', 15);
 define('VOUCHERS', 16);
 define('UNITS', 17);
 define('EMAIL', 18);
+define('ELECTRONIC_INVOICE', 19);  // Facturación Electrónica
+define('DIAN_CONFIG', 20);         // Configuración DIAN
 /* DELIMITADORES */
 define('SPD', ".");
 define('SPM', ",");
