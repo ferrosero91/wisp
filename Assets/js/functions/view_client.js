@@ -1,4 +1,4 @@
-document.write(`<script src="https://maps.googleapis.com/maps/api/js?libraries=places,geometry&key=${key_google}"></script>`);
+(function(){var s=document.createElement('script');s.src="https://maps.googleapis.com/maps/api/js?libraries=places,geometry&key="+key_google;s.async=true;document.head.appendChild(s)})();
 let table_ticket,table_internet,table_personalized,table_transactions,table_bills;
 let table_name_ticket="list-ticket",table_name_inter="list-internet",table_name_person="list-personalized",table_name_bills="list-bills",table_name_trans = "list-transactions";
 var client = document.querySelector('#idclients');

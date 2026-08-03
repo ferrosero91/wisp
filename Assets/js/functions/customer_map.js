@@ -1,4 +1,4 @@
-document.write(`<script src="https://maps.googleapis.com/maps/api/js?libraries=places,geometry&key=${key_google}&callback=initMap"></script>`);
+(function(){var s=document.createElement('script');s.src="https://maps.googleapis.com/maps/api/js?libraries=places,geometry&key="+key_google+"&callback=initMap";s.async=true;document.head.appendChild(s)})();
 function initMap(){
   var myLatlng = new google.maps.LatLng(0.0, -0.0);
   var infowindow = null;

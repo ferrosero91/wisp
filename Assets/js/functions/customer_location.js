@@ -1,4 +1,4 @@
-document.write(`<script src="https://maps.googleapis.com/maps/api/js?libraries=places,geometry&key=${key_google}&callback=initMap"></script>`);
+(function(){var s=document.createElement('script');s.src="https://maps.googleapis.com/maps/api/js?libraries=places,geometry&key="+key_google+"&callback=initMap";s.async=true;document.head.appendChild(s)})();
 var map;
 var lat_client = $('#lat_client').val();
 var lng_client = $('#lng_client').val();

@@ -1,4 +1,4 @@
-document.write(`<script src="https://maps.googleapis.com/maps/api/js?libraries=places,geometry&key=${key_google}&callback=initMap"></script>`);
+(function(){var s=document.createElement('script');s.src="https://maps.googleapis.com/maps/api/js?libraries=places,geometry&key="+key_google+"&callback=initMap";s.async=true;document.head.appendChild(s)})();
 let btnadd =  document.querySelector(".btn-add");
 let client =  document.querySelector("#idclient");
 let facility =  document.querySelector("#idfacility");
