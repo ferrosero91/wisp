@@ -430,7 +430,9 @@
 }
 
 /* ============ MEJORAS DE DROPDOWNS ============ */
-.dropdown-menu {
+/* No aplicar estilos al theme-panel */
+.navbar-nav .dropdown-menu,
+.header .dropdown-menu {
     animation: fadeInDown 0.2s ease-out;
     border: 1px solid var(--m-border);
     box-shadow: var(--m-shadow-hover);
@@ -438,13 +440,15 @@
     padding: 8px;
 }
 
-.dropdown-item {
+.navbar-nav .dropdown-item,
+.header .dropdown-item {
     transition: all 0.2s ease;
     border-radius: 8px;
     padding: 10px 16px;
 }
 
-.dropdown-item:hover {
+.navbar-nav .dropdown-item:hover,
+.header .dropdown-item:hover {
     background: var(--m-primary-soft);
     color: var(--m-primary-dark);
     transform: translateX(5px);

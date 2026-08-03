@@ -141,7 +141,7 @@
     <!-- ================== FIN API GOOGLE MAPS JS ================== -->
     <?php if(isset($data['page_functions_js'])){ ?>
     <!-- ================== INICIO FUNCION JS ============ -->
-    <script defer src="<?= base_style() ?>/js/functions/<?= $data['page_functions_js']; ?>?v=2026080226"></script>
+    <script defer src="<?= base_style() ?>/js/functions/<?= $data['page_functions_js']; ?>?v=2026080227"></script>
     <!-- ================== FIN FUNCION JS =============== -->
      <?php } ?>
     </body>
