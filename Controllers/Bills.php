@@ -1,10 +1,4 @@
 <?php
-  require 'Libraries/dompdf/vendor/autoload.php';
-  require 'Libraries/spreadsheet/vendor/autoload.php';
-  use PhpOffice\PhpSpreadsheet\Spreadsheet;
-  use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-  use PhpOffice\PhpSpreadsheet\IOFactory;
-  use Dompdf\Dompdf;
   class Bills extends Controllers{
     public function __construct(){
       parent::__construct();
@@ -467,6 +461,7 @@
             }
         }
         public function bill_voucher(string $params){
+            require 'Libraries/dompdf/vendor/autoload.php';
             if($_SESSION['permits_module']['v']){
                 if(empty($params)){
                    header("Location:".base_url()."/bills");
@@ -493,7 +488,7 @@
                             $html = redirect_pdf("Resources/reports/pdf/invoice_ticket",$data);
                             $customPaper = array(0,0,204,700);
                           }
-                          $dompdf = new Dompdf();
+                          $dompdf = new \Dompdf\Dompdf();
 
                           $options = $dompdf->getOptions();
                           $options->set(array('isRemoteEnabled' => true));
@@ -929,11 +924,12 @@
             die();
         }
         public function import(){
+            require 'Libraries/spreadsheet/vendor/autoload.php';
             /* Variable Post */
             $file = $_FILES["import_bills"]["tmp_name"];
             //$file = "Assets/facturas.xlsx";
             /* Cargamos el archivo */
-            $document = IOFactory::load($file);
+            $document = \PhpOffice\PhpSpreadsheet\IOFactory::load($file);
             /* Hoja Productos*/
             $bills_sheet = $document->getSheetByName("Facturas");
             $row_bills = $bills_sheet->getHighestDataRow();
@@ -1042,7 +1038,8 @@
             die();
         }
         public function export(){
-            $spreadsheet = new SpreadSheet();
+            require 'Libraries/spreadsheet/vendor/autoload.php';
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
             $style_header = array(
                 'font' => array(
                     'name'  => 'Calibri',
@@ -1157,11 +1154,12 @@
             header('Content-Disposition: attachment;filename="'. $title .'.xlsx"');
             header('Cache-Control: max-age=0');
 
-            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
             $writer->save('php://output');
         }
         public function export_pendings(){
-            $spreadsheet = new SpreadSheet();
+            require 'Libraries/spreadsheet/vendor/autoload.php';
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
             $style_header = array(
                 'font' => array(
                     'name'  => 'Calibri',
@@ -1262,7 +1260,7 @@
             header('Content-Disposition: attachment;filename="'. $title .'.xlsx"');
             header('Cache-Control: max-age=0');
 
-            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
             $writer->save('php://output');
         }
         public function debt_opening(string $params){

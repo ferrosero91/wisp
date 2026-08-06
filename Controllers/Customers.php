@@ -1,12 +1,4 @@
 <?php
-  require 'Libraries/resize/vendor/autoload.php';
-  require 'Libraries/dompdf/vendor/autoload.php';
-  require 'Libraries/spreadsheet/vendor/autoload.php';
-  use PhpOffice\PhpSpreadsheet\Spreadsheet;
-  use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-  use PhpOffice\PhpSpreadsheet\IOFactory;
-  use Verot\Upload\Upload;
-  use Dompdf\Dompdf;
   class Customers extends Controllers{
     public function __construct(){
       parent::__construct();
@@ -561,11 +553,12 @@
       die();
     }
     public function import(){
+      require 'Libraries/spreadsheet/vendor/autoload.php';
       /* Variable Post */
       $file = $_FILES["import_clients"]["tmp_name"];
       //$file = "Assets/clients.xlsx";
       /* Cargamos el archivo */
-      $document = IOFactory::load($file);
+      $document = \PhpOffice\PhpSpreadsheet\IOFactory::load($file);
       /* Hoja Productos*/
       $customer_sheet = $document->getSheetByName("Clientes");
       $row_clients = $customer_sheet->getHighestDataRow();
@@ -699,7 +692,8 @@
       die();
     }
     public function export(){
-      $spreadsheet = new SpreadSheet();
+      require 'Libraries/spreadsheet/vendor/autoload.php';
+      $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
       $style_header = array(
         'font' => array(
           'name'  => 'Calibri',
@@ -838,7 +832,7 @@
       header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       header('Content-Disposition: attachment;filename="'. $title .'.xlsx"');
       header('Cache-Control: max-age=0');
-      $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+      $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
       $writer->save('php://output');
     }
     /* MODULO FACTURAS */
@@ -1243,6 +1237,7 @@
       }
     }
     public function bill_voucher(string $params){
+      require 'Libraries/dompdf/vendor/autoload.php';
       if($_SESSION['permits_module']['v']){
         if(empty($params)){
           header("Location:".base_url()."/customers/clients");
@@ -1269,7 +1264,7 @@
                 $html = redirect_pdf("Resources/reports/pdf/invoice_ticket",$data);
                 $customPaper = array(0,0,204,700);
               }
-              $dompdf = new Dompdf();
+              $dompdf = new \Dompdf\Dompdf();
               $options = $dompdf->getOptions();
               $options->set(array('isRemoteEnabled' => true));
               $dompdf->setOptions($options);
@@ -1962,6 +1957,7 @@
       die();
     }
     public function view_pdf(string $idticket){
+      require 'Libraries/dompdf/vendor/autoload.php';
       if($_SESSION['permits_module']['v']){
         if(empty($idticket)){
          header("Location:".base_url()."/customers");
@@ -1976,7 +1972,7 @@
               ob_end_clean();
               $html = redirect_pdf("Resources/reports/pdf/ticket_soporte",$data);
               $customPaper = array(0,0,204,400);
-              $dompdf = new Dompdf();
+              $dompdf = new \Dompdf\Dompdf();
               $options = $dompdf->getOptions();
               $options->set(array('isRemoteEnabled' => true));
               $dompdf->setOptions($options);

@@ -462,10 +462,16 @@
       return $request;
     }
     function consent_permission(int $module){
-      require_once ("Models/PermissionsModel.php");
-      $object = new PermissionsModel();
-      $profile = $_SESSION['userData']['profileid'];
-      $arrPermits = $object->module_permissions($profile);
+      // Cachear permisos en sesión para no consultar en cada página
+      if(!isset($_SESSION['permits_cache']) || !isset($_SESSION['permits_cache_time']) || (time() - $_SESSION['permits_cache_time']) > 300){
+        require_once ("Models/PermissionsModel.php");
+        $object = new PermissionsModel();
+        $profile = $_SESSION['userData']['profileid'];
+        $arrPermits = $object->module_permissions($profile);
+        $_SESSION['permits_cache'] = $arrPermits;
+        $_SESSION['permits_cache_time'] = time();
+      }
+      $arrPermits = $_SESSION['permits_cache'];
       $permits = '';
       $permits_module = '';
       if(count($arrPermits) > 0 ){
