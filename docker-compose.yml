@@ -62,6 +62,18 @@ services:
       - MYSQL_PASSWORD=${DB_PASSWORD}
       - MYSQL_CHARACTER_SET_SERVER=utf8
       - MYSQL_COLLATION_SERVER=utf8_spanish2_ci
+    command: >
+      --innodb-buffer-pool-size=256M
+      --innodb-log-file-size=64M
+      --innodb-flush-log-at-trx-commit=2
+      --innodb-flush-method=O_DIRECT
+      --max-connections=200
+      --query-cache-type=1
+      --query-cache-size=32M
+      --tmp-table-size=64M
+      --max-heap-table-size=64M
+      --join-buffer-size=2M
+      --sort-buffer-size=2M
     volumes:
       - wisp-db-data:/var/lib/mysql
     healthcheck:

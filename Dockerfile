@@ -44,16 +44,21 @@ RUN { \
     echo 'display_errors=Off'; \
     echo 'log_errors=On'; \
     echo 'error_reporting=E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_USER_NOTICE & ~E_WARNING'; \
-    echo 'memory_limit=256M'; \
+    echo 'memory_limit=512M'; \
     echo 'upload_max_filesize=20M'; \
     echo 'post_max_size=25M'; \
-    echo 'max_execution_time=60'; \
+    echo 'max_execution_time=300'; \
+    echo 'max_input_time=300'; \
     echo 'date.timezone=America/Lima'; \
     echo 'session.cookie_httponly=1'; \
     echo 'session.use_strict_mode=1'; \
     echo 'opcache.enable=1'; \
-    echo 'opcache.memory_consumption=128'; \
-    echo 'opcache.max_accelerated_files=10000'; \
+    echo 'opcache.memory_consumption=256'; \
+    echo 'opcache.max_accelerated_files=20000'; \
+    echo 'opcache.revalidate_freq=60'; \
+    echo 'opcache.validate_timestamps=0'; \
+    echo 'realpath_cache_size=4096K'; \
+    echo 'realpath_cache_ttl=600'; \
 } > /usr/local/etc/php/conf.d/wisp.ini
 
 # Configurar Apache para producción
@@ -66,6 +71,9 @@ RUN { \
     echo '</Directory>'; \
     echo 'ServerTokens Prod'; \
     echo 'ServerSignature Off'; \
+    echo 'KeepAlive On'; \
+    echo 'MaxKeepAliveRequests 100'; \
+    echo 'KeepAliveTimeout 5'; \
 } > /etc/apache2/conf-available/wisp.conf \
 && a2enconf wisp
 
