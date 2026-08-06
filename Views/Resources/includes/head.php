@@ -31,9 +31,22 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
         <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"></noscript>
+        <link rel="preload" href="<?= base_style() ?>/css/default/app.min.css" as="style">
         <link rel="preload" href="<?= base_style() ?>/js/app.min.js" as="script">
-        <!-- CSS Bundle (todos los CSS combinados) -->
-        <link rel="stylesheet" href="<?= base_url() ?>/Views/Resources/includes/bundle-css.php">
+        <!-- CSS crítico -->
+        <link rel="stylesheet" href="<?= base_style() ?>/css/default/app.min.css">
+        <link rel="stylesheet" href="<?= base_style() ?>/css/datatables.min.css"/>
+        <link rel="stylesheet" href="<?= base_style() ?>/css/superwisp.css?v=2026080220">
+        <link rel="stylesheet" href="<?= base_style() ?>/css/jquery-confirm.min.css">
+        <link rel="stylesheet" href="<?= base_style() ?>/bookstores/simple-line-icons/css/simple-line-icons.css">
+        <link rel="stylesheet" href="<?= base_style() ?>/bookstores/ionicons/css/ionicons.min.css">
+        <link rel="stylesheet" href="<?= base_style() ?>/bookstores/gritter/css/jquery.gritter.css"/>
+        <link rel="stylesheet" href="<?= base_style() ?>/bookstores/select2/css/select2.min.css">
+        <link rel="stylesheet" href="<?= base_style() ?>/bookstores/smartwizard/css/smart_wizard.css">
+        <link rel="stylesheet" href="<?= base_style() ?>/bookstores/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css">
+        <link rel="stylesheet" href="<?= base_style() ?>/bookstores/lightbox/css/lightbox.css">
+        <link rel="stylesheet" href="<?= base_style() ?>/css/modern.css?v=2026080222">
+        <link rel="stylesheet" href="<?= base_style() ?>/css/ui-enhancements.css?v=2026080222">
         <!-- ================== FIN ARCHIVOS CSS ============== -->
         <!-- ================== INICIO TITULO ================= -->
         <title><?= $data['page_name'] ?></title>
