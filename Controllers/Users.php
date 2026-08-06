@@ -128,30 +128,7 @@ use Verot\Upload\Upload;
             $arrParams = explode(",",$params);
             $type = $arrParams[0];
             $document = $arrParams[1];
-            if($type == 2){
-                $validate = strlen($document);
-                if($validate < 8){
-                    $arrResponse = array('status' => 'info', 'msg' => 'La cédula no debe tener menos de 8 digitos.');
-                }else if($validate > 10){
-                    $arrResponse = array('status' => 'info', 'msg' => 'La cédula no debe tener mas de 10 digitos.');
-                }else{
-                    $answer = consult_document("dni",$document,$_SESSION['businessData']['reniec_apikey']);
-                    if(empty($answer['success'])){
-                        $arrResponse = array('status' => 'error', 'msg' => 'No se encontraton resultados.');
-                    }else{
-                        $arrConsult = array(
-                            "names" => $answer['data']['nombres'],
-                            "surnames" => $answer['data']['apellido_paterno']." ".$answer['data']['apellido_materno'],
-                            "dni" => $answer['data']['numero']
-                        );
-                        $arrResponse = array('status' => 'success', 'data' => $arrConsult);
-                    }
-                }
-            }else if(in_array($type, array(4,5,6,7,8))){
-                $arrResponse = array('status' => 'info', 'msg' => 'La consulta automática no esta disponible para este tipo de documento, complete los datos manualmente.');
-            }else{
-                $arrResponse = array('status' => 'error', 'msg' => 'La busqueda solo es para la cédula.');
-            }
+            $arrResponse = array('status' => 'info', 'msg' => 'Complete los datos manualmente.');
             echo json_encode($arrResponse,JSON_UNESCAPED_UNICODE);
             die();
         }

@@ -122,19 +122,14 @@
           /* VARIABLES */
           $notices = '';
           $mobiles = '';
-          $list_services = '';
           $data[$i]['permits_edit'] = $_SESSION['permits_module']['a'];
           $data[$i]['profile_user'] = $_SESSION['userData']['profileid'];
           /* ID CONTRATO ENCRYTADO */
           $data[$i]['encrypt'] = encrypt($data[$i]['id']);
           /* ID CLIENTE ENCRYTADO */
           $data[$i]['encrypt_client'] = encrypt($data[$i]['clientid']);
-          /* LISTA DE SERVICOS */
-          $services = $this->model->contract_services($data[$i]['id']);
-          for($p=0; $p < count($services); $p++){
-            $list_services .= $services[$p]['service']."<br>";
-          }
-          $data[$i]['services'] = $list_services;
+          /* LISTA DE SERVICOS - ya viene del query optimizado */
+          $data[$i]['services'] = $data[$i]['services'] ?? '';
           /* CELULARES */
           if(!empty($data[$i]['mobile'])){
             $mobiles .= '<a href="javascript:;" onclick="modal_tools(\''.encrypt($data[$i]['clientid']).'\',\''.$data[$i]['mobile'].'\')"><i class="fa fa-mobile mr-1"></i>'.$data[$i]['mobile'].'</a>';
@@ -154,21 +149,21 @@
           /* DIA DE PAGO */
           $payday = str_pad($data[$i]['payday'], 2, "0", STR_PAD_LEFT);
           $data[$i]['payday'] = ($data[$i]['state'] == 5) ? 0 : $payday;
-          /* ULTIMO PAGO */
-          $lastpayment = $this->model->last_payment($data[$i]['clientid']);
+          /* ULTIMO PAGO - ya viene del query optimizado */
+          $lastpayment = $data[$i]['last_payment'];
           $data[$i]['last_payment'] = empty($lastpayment) ? "00/00/0000" : date("d/m/Y", strtotime($lastpayment));
-          /* DEUDA ACTUAL */
-          $balance = $this->model->outstanding_balance($data[$i]['clientid']);
-          $slopes = $this->model->pending_payments($data[$i]['clientid']);
+          /* DEUDA ACTUAL - ya viene del query optimizado */
+          $balance = $data[$i]['outstanding_balance'];
+          $slopes = $data[$i]['pending_payments'];
           if($slopes >= 1){
             $data[$i]['pending_payments'] = '<span class="badge associates badge-danger mr-1">'.$slopes.'</span>'.$_SESSION['businessData']['symbol'].' '.format_money($balance);
           }else{
             $data[$i]['pending_payments'] = $_SESSION['businessData']['symbol'].format_money($balance);
           }
-          /* PROXIMO PAGO */
-          $pendinService = $this->model->pending_services($data[$i]['clientid']);
+          /* PROXIMO PAGO - ya viene del query optimizado */
+          $pendinService = $data[$i]['pending_services'];
           if($pendinService >= 1){
-            $paydate = $this->model->next_payment($data[$i]['clientid']);
+            $paydate = $data[$i]['next_payment'];
             $data[$i]['payment_date'] = ($paydate == '0000-00-00') ? '00/00/0000' : date("d/m/Y", strtotime($paydate." + 1 month"));
           }else{
             $date_exp = date("Y-m-".$payday);
@@ -464,49 +459,7 @@
       $arrParams = explode(",",$params);
       $type = $arrParams[0];
       $document = $arrParams[1];
-      if($type == 2){
-        $validate = strlen($document);
-        if($validate < 8){
-          $arrResponse = array('status' => 'info', 'msg' => 'La cédula no debe tener menos de 8 dígitos.');
-        }else if($validate > 10){
-          $arrResponse = array('status' => 'info', 'msg' => 'La cédula no debe tener mas de 10 dígitos.');
-        }else{
-          $answer = consult_document("dni",$document,$_SESSION['businessData']['reniec_apikey']);
-          if(empty($answer['success'])){
-            $arrResponse = array('status' => 'error', 'msg' => 'No se encontraton resultados.');
-          }else{
-            $data = array(
-              "names" => $answer['data']['nombres'],
-              "surnames" => $answer['data']['apellido_paterno']." ".$answer['data']['apellido_materno'],
-              "address" => $answer['data']['direccion']
-            );
-            $arrResponse = array('status' => 'success', 'data' => $data);
-          }
-        }
-      }
-      if($type == 3){
-        $validate = strlen($document);
-        if($validate < 8){
-          $arrResponse = array('status' => 'info', 'msg' => 'El NIT no debe tener menos de 8 dígitos.');
-        }else if($validate > 10){
-          $arrResponse = array('status' => 'info', 'msg' => 'El NIT no debe tener mas de 10 dígitos.');
-        }else{
-          $answer = consult_document("ruc",$document,$_SESSION['businessData']['reniec_apikey']);
-          if(empty($answer['success'])){
-            $arrResponse = array('status' => 'error', 'msg' => 'No se encontraton resultados.');
-          }else{
-            $data = array(
-              "names" => $answer['data']['nombre_o_razon_social'],
-              "surnames" => "-",
-              "address" => $answer['data']['direccion']
-            );
-            $arrResponse = array('status' => 'success', 'data' => $data);
-          }
-        }
-      }
-      if(in_array($type, array(4,5,6,7,8))){
-        $arrResponse = array('status' => 'info', 'msg' => 'La consulta automática no esta disponible para este tipo de documento, complete los datos manualmente.');
-      }
+      $arrResponse = array('status' => 'info', 'msg' => 'Complete los datos manualmente.');
       echo json_encode($arrResponse,JSON_UNESCAPED_UNICODE);
       die();
     }
