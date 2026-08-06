@@ -53,6 +53,7 @@ RUN { \
 
 # Configurar Apache para producción
 RUN { \
+    echo 'ServerName localhost'; \
     echo '<Directory /var/www/html>'; \
     echo '    Options -Indexes +FollowSymLinks'; \
     echo '    AllowOverride All'; \
