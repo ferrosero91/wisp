@@ -50,7 +50,9 @@ services:
   # Servicio de Base de Datos MariaDB
   # ----------------------------------------------------------
   db:
-    image: mariadb:10.11
+    build:
+      context: .
+      dockerfile: docker/db/Dockerfile
     container_name: wisp-db
     restart: unless-stopped
     environment:
@@ -62,7 +64,6 @@ services:
       - MYSQL_COLLATION_SERVER=utf8_spanish2_ci
     volumes:
       - wisp-db-data:/var/lib/mysql
-      - ./database.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
