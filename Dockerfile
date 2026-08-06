@@ -13,22 +13,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libzip-dev \
     libonig-dev \
     libcurl4-openssl-dev \
-    libssl-dev \
     libxml2-dev \
     unzip \
     curl \
     git \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
-        pdo \
         pdo_mysql \
         mysqli \
         gd \
         mbstring \
         zip \
-        curl \
-        openssl \
-        xml \
         opcache \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
