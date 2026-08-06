@@ -5,6 +5,7 @@
 
 # Copias de seguridad y dumps
 *.sql
+!database.sql
 !database_dian_tables.sql
 !database_electronic_modules.sql
 *.zip
