@@ -1,0 +1,58 @@
+# Git
+.git
+.gitignore
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Docker
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Documentation
+*.md
+!README.md
+
+# Logs
+error_log
+error_log.php
+*.log
+Logs/
+
+# Cache
+cache/
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backups
+*.sql
+!database.sql
+*.zip
+*.rar
+*.bak
+
+# Development files
+setup_virtual_host.bat
+verify_setup.php
+HOST_VIRTUAL_README.md
+migrate_*.php
+import_municipalities.php
+
+# Vendor (will be installed during build)
+Libraries/dompdf/vendor/
+Libraries/resize/vendor/
+Libraries/spreadsheet/vendor/
+
+# Certificates (sensitive)
+Assets/uploads/certificates/

@@ -1,0 +1,93 @@
+# ============================================================
+# Docker Compose - WISP Internet System
+# Servicios: App (PHP+Apache) + MariaDB
+# ============================================================
+
+services:
+  # ----------------------------------------------------------
+  # Servicio de Aplicación PHP + Apache
+  # ----------------------------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wisp-app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:80"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=${DB_NAME:-nacion17_internet}
+      - DB_USER=${DB_USER:-wisp_user}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_CHARSET=${DB_CHARSET:-utf8}
+      - BASE_URL=${BASE_URL:-http://localhost:8080/}
+      - NAME_SYSTEM=${NAME_SYSTEM:-INTERNET SYSTEM}
+      - SECRET_KEY=${SECRET_KEY}
+      - SECRET_IV=${SECRET_IV}
+      - APP_ENV=${APP_ENV:-production}
+      - APP_DEBUG=${APP_DEBUG:-false}
+      - APIDIAN_URL=${APIDIAN_URL:-}
+      - APIDIAN_TOKEN=${APIDIAN_TOKEN:-}
+      - APIDIAN_NIT=${APIDIAN_NIT:-}
+      - APIDIAN_DV=${APIDIAN_DV:-}
+      - APIDIAN_ENVIRONMENT=${APIDIAN_ENVIRONMENT:-habilitacion}
+      - APIDIAN_PREFIX=${APIDIAN_PREFIX:-SETP}
+      - APIDIAN_RESOLUTION=${APIDIAN_RESOLUTION:-}
+      - APIDIAN_RESOLUTION_FROM=${APIDIAN_RESOLUTION_FROM:-1}
+      - APIDIAN_RESOLUTION_TO=${APIDIAN_RESOLUTION_TO:-999999999}
+    volumes:
+      - wisp-uploads:/var/www/html/Assets/uploads
+      - wisp-logs:/var/www/html/Logs
+      - wisp-cache:/var/www/html/cache
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - wisp-network
+
+  # ----------------------------------------------------------
+  # Servicio de Base de Datos MariaDB
+  # ----------------------------------------------------------
+  db:
+    image: mariadb:10.11
+    container_name: wisp-db
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpassword}
+      - MYSQL_DATABASE=${DB_NAME:-nacion17_internet}
+      - MYSQL_USER=${DB_USER:-wisp_user}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_CHARACTER_SET_SERVER=utf8
+      - MYSQL_COLLATION_SERVER=utf8_spanish2_ci
+    volumes:
+      - wisp-db-data:/var/lib/mysql
+      - ./database.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - wisp-network
+
+# ----------------------------------------------------------
+# Volúmenes persistentes
+# ----------------------------------------------------------
+volumes:
+  wisp-db-data:
+    driver: local
+  wisp-uploads:
+    driver: local
+  wisp-logs:
+    driver: local
+  wisp-cache:
+    driver: local
+
+# ----------------------------------------------------------
+# Red interna
+# ----------------------------------------------------------
+networks:
+  wisp-network:
+    driver: bridge
