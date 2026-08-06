@@ -70,10 +70,10 @@ WORKDIR /var/www/html
 # Copiar archivos del proyecto
 COPY --chown=www-data:www-data . .
 
-# Instalar dependencias de Composer
-RUN if [ -f "composer.json" ]; then \
-        composer install --no-dev --optimize-autoloader --no-interaction; \
-    fi
+# Instalar dependencias de Composer en cada subdirectorio
+RUN cd Libraries/dompdf && composer install --no-dev --optimize-autoloader --no-interaction
+RUN cd Libraries/resize && composer install --no-dev --optimize-autoloader --no-interaction
+RUN cd Libraries/spreadsheet && composer install --no-dev --optimize-autoloader --no-interaction
 
 # Crear directorios necesarios y establecer permisos
 RUN mkdir -p /var/www/html/Assets/uploads/users \
