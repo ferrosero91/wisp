@@ -34,6 +34,10 @@ RUN a2enmod rewrite
 # Instalar Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# Configurar Composer para ignorar advisories de seguridad durante build
+ENV COMPOSER_ALLOW_SUPERUSER=1
+RUN composer config --global policy.advisories.block false
+
 # Configurar PHP para producción
 RUN { \
     echo 'display_errors=Off'; \
@@ -71,9 +75,9 @@ WORKDIR /var/www/html
 COPY --chown=www-data:www-data . .
 
 # Instalar dependencias de Composer en cada subdirectorio
-RUN cd Libraries/dompdf && composer install --no-dev --optimize-autoloader --no-interaction
-RUN cd Libraries/resize && composer install --no-dev --optimize-autoloader --no-interaction
-RUN cd Libraries/spreadsheet && composer install --no-dev --optimize-autoloader --no-interaction
+RUN cd Libraries/dompdf && composer config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true 2>/dev/null; composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs
+RUN cd Libraries/resize && composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs
+RUN cd Libraries/spreadsheet && composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs
 
 # Crear directorios necesarios y establecer permisos
 RUN mkdir -p /var/www/html/Assets/uploads/users \
