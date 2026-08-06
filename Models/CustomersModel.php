@@ -52,7 +52,7 @@
         LEFT JOIN (
           SELECT b.clientid,
             COALESCE(SUM(CASE WHEN b.state NOT IN(1,4) THEN b.remaining_amount ELSE 0 END), 0) AS outstanding_balance,
-            COUNT(CASE WHEN b.state NOT IN(1,4) AND b.id NOT IN(SELECT billid FROM payments WHERE state = 1) THEN 1 END) AS pending_payments,
+            COUNT(CASE WHEN b.state NOT IN(1,4) THEN 1 END) AS pending_payments,
             COUNT(CASE WHEN b.state NOT IN(1,4) AND b.type = 2 THEN 1 END) AS pending_services,
             MAX(CASE WHEN b.state != 4 AND b.type = 2 THEN b.expiration_date END) AS next_payment
           FROM bills b
@@ -87,7 +87,7 @@
         LEFT JOIN (
           SELECT b.clientid,
             COALESCE(SUM(CASE WHEN b.state NOT IN(1,4) THEN b.remaining_amount ELSE 0 END), 0) AS outstanding_balance,
-            COUNT(CASE WHEN b.state NOT IN(1,4) AND b.id NOT IN(SELECT billid FROM payments WHERE state = 1) THEN 1 END) AS pending_payments,
+            COUNT(CASE WHEN b.state NOT IN(1,4) THEN 1 END) AS pending_payments,
             COUNT(CASE WHEN b.state NOT IN(1,4) AND b.type = 2 THEN 1 END) AS pending_services,
             MAX(CASE WHEN b.state != 4 AND b.type = 2 THEN b.expiration_date END) AS next_payment
           FROM bills b
