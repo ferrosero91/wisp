@@ -28,24 +28,72 @@
       if($state == 0){
         $sql = "SELECT c.id,c.internal_code,c.clientid,c.payday,c.create_invoice,c.days_grace,c.discount,c.discount_price,c.months_discount,c.contract_date,c.suspension_date,c.finish_date,c.state,
         CONCAT_WS(' ', cl.names, cl.surnames) AS client,cl.document,d.document AS name_doc,cl.latitud,cl.longitud,cl.email,cl.mobile,cl.mobile_optional,cl.address,cl.reference,
-        (SELECT GROUP_CONCAT(s.service SEPARATOR '<br>') FROM detail_contracts dc JOIN services s ON dc.serviceid = s.id WHERE dc.contractid = c.id) AS services,
-        (SELECT MAX(p.payment_date) FROM payments p WHERE p.clientid = cl.id AND p.state = 1) AS last_payment,
-        (SELECT COALESCE(SUM(b.remaining_amount),0) FROM bills b WHERE b.clientid = cl.id AND b.state NOT IN(1,4)) AS outstanding_balance,
-        (SELECT COUNT(*) FROM bills b WHERE b.clientid = cl.id AND b.state NOT IN(1,4) AND b.id NOT IN(SELECT billid FROM payments WHERE state = 1)) AS pending_payments,
-        (SELECT COUNT(b.id) FROM bills b WHERE b.clientid = cl.id AND b.state NOT IN(1,4) AND b.type = 2) AS pending_services,
-        (SELECT MAX(b.expiration_date) FROM bills b WHERE b.clientid = cl.id AND b.state != 4 AND b.type = 2) AS next_payment
-        FROM contracts c JOIN clients cl ON c.clientid = cl.id JOIN document_type d ON cl.documentid = d.id WHERE c.state != 0 ORDER BY c.id DESC";
+        COALESCE(services_list.services, '') AS services,
+        COALESCE(last_pay.payment_date, NULL) AS last_payment,
+        COALESCE(bills_data.outstanding_balance, 0) AS outstanding_balance,
+        COALESCE(bills_data.pending_payments, 0) AS pending_payments,
+        COALESCE(bills_data.pending_services, 0) AS pending_services,
+        COALESCE(bills_data.next_payment, NULL) AS next_payment
+        FROM contracts c 
+        JOIN clients cl ON c.clientid = cl.id 
+        JOIN document_type d ON cl.documentid = d.id
+        LEFT JOIN (
+          SELECT dc.contractid, GROUP_CONCAT(s.service SEPARATOR '<br>') AS services
+          FROM detail_contracts dc 
+          JOIN services s ON dc.serviceid = s.id 
+          GROUP BY dc.contractid
+        ) services_list ON services_list.contractid = c.id
+        LEFT JOIN (
+          SELECT p.clientid, MAX(p.payment_date) AS payment_date
+          FROM payments p 
+          WHERE p.state = 1 
+          GROUP BY p.clientid
+        ) last_pay ON last_pay.clientid = cl.id
+        LEFT JOIN (
+          SELECT b.clientid,
+            COALESCE(SUM(CASE WHEN b.state NOT IN(1,4) THEN b.remaining_amount ELSE 0 END), 0) AS outstanding_balance,
+            COUNT(CASE WHEN b.state NOT IN(1,4) AND b.id NOT IN(SELECT billid FROM payments WHERE state = 1) THEN 1 END) AS pending_payments,
+            COUNT(CASE WHEN b.state NOT IN(1,4) AND b.type = 2 THEN 1 END) AS pending_services,
+            MAX(CASE WHEN b.state != 4 AND b.type = 2 THEN b.expiration_date END) AS next_payment
+          FROM bills b
+          GROUP BY b.clientid
+        ) bills_data ON bills_data.clientid = cl.id
+        WHERE c.state != 0 ORDER BY c.id DESC";
         $answer = $this->select_all($sql);
       }else{
         $sql = "SELECT c.id,c.internal_code,c.clientid,c.payday,c.create_invoice,c.days_grace,c.discount,c.discount_price,c.months_discount,c.contract_date,c.suspension_date,c.finish_date,c.state,
         CONCAT_WS(' ', cl.names, cl.surnames) AS client,cl.document,d.document AS name_doc,cl.latitud,cl.longitud,cl.email,cl.mobile,cl.mobile_optional,cl.address,cl.reference,
-        (SELECT GROUP_CONCAT(s.service SEPARATOR '<br>') FROM detail_contracts dc JOIN services s ON dc.serviceid = s.id WHERE dc.contractid = c.id) AS services,
-        (SELECT MAX(p.payment_date) FROM payments p WHERE p.clientid = cl.id AND p.state = 1) AS last_payment,
-        (SELECT COALESCE(SUM(b.remaining_amount),0) FROM bills b WHERE b.clientid = cl.id AND b.state NOT IN(1,4)) AS outstanding_balance,
-        (SELECT COUNT(*) FROM bills b WHERE b.clientid = cl.id AND b.state NOT IN(1,4) AND b.id NOT IN(SELECT billid FROM payments WHERE state = 1)) AS pending_payments,
-        (SELECT COUNT(b.id) FROM bills b WHERE b.clientid = cl.id AND b.state NOT IN(1,4) AND b.type = 2) AS pending_services,
-        (SELECT MAX(b.expiration_date) FROM bills b WHERE b.clientid = cl.id AND b.state != 4 AND b.type = 2) AS next_payment
-        FROM contracts c JOIN clients cl ON c.clientid = cl.id JOIN document_type d ON cl.documentid = d.id WHERE c.state = ? ORDER BY c.id DESC";
+        COALESCE(services_list.services, '') AS services,
+        COALESCE(last_pay.payment_date, NULL) AS last_payment,
+        COALESCE(bills_data.outstanding_balance, 0) AS outstanding_balance,
+        COALESCE(bills_data.pending_payments, 0) AS pending_payments,
+        COALESCE(bills_data.pending_services, 0) AS pending_services,
+        COALESCE(bills_data.next_payment, NULL) AS next_payment
+        FROM contracts c 
+        JOIN clients cl ON c.clientid = cl.id 
+        JOIN document_type d ON cl.documentid = d.id
+        LEFT JOIN (
+          SELECT dc.contractid, GROUP_CONCAT(s.service SEPARATOR '<br>') AS services
+          FROM detail_contracts dc 
+          JOIN services s ON dc.serviceid = s.id 
+          GROUP BY dc.contractid
+        ) services_list ON services_list.contractid = c.id
+        LEFT JOIN (
+          SELECT p.clientid, MAX(p.payment_date) AS payment_date
+          FROM payments p 
+          WHERE p.state = 1 
+          GROUP BY p.clientid
+        ) last_pay ON last_pay.clientid = cl.id
+        LEFT JOIN (
+          SELECT b.clientid,
+            COALESCE(SUM(CASE WHEN b.state NOT IN(1,4) THEN b.remaining_amount ELSE 0 END), 0) AS outstanding_balance,
+            COUNT(CASE WHEN b.state NOT IN(1,4) AND b.id NOT IN(SELECT billid FROM payments WHERE state = 1) THEN 1 END) AS pending_payments,
+            COUNT(CASE WHEN b.state NOT IN(1,4) AND b.type = 2 THEN 1 END) AS pending_services,
+            MAX(CASE WHEN b.state != 4 AND b.type = 2 THEN b.expiration_date END) AS next_payment
+          FROM bills b
+          GROUP BY b.clientid
+        ) bills_data ON bills_data.clientid = cl.id
+        WHERE c.state = ? ORDER BY c.id DESC";
         $answer = $this->select_all($sql, array($state));
       }
       return $answer;
